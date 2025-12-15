@@ -3,8 +3,8 @@ const router = express.Router();
 const { sequelize } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 
-// Stats - Admin & ReportViewer
-router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer'])], async (req, res) => {
+// Stats - Admin & ReportViewer & Watcher
+router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'])], async (req, res) => {
     try {
         // Basic stats aggregation
         // Sales vs Purchases

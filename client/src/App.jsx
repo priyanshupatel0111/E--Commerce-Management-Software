@@ -9,6 +9,9 @@ import POS from './pages/POS';
 import Purchases from './pages/Purchases';
 import Reports from './pages/Reports';
 import ActivityLogs from './pages/ActivityLogs';
+import Dashboard from './pages/Dashboard';
+import UserManagement from './pages/UserManagement';
+import SalesHistory from './pages/SalesHistory'; // Added
 
 function App() {
   return (
@@ -22,10 +25,12 @@ function App() {
 
           {/* Protected Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<div className="text-gray-500 text-xl">Select an option from the sidebar.</div>} />
+            <Route index element={<Dashboard />} />
+            <Route path="users" element={<UserManagement />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="pos" element={<POS />} />
             <Route path="purchases" element={<Purchases />} />
+            <Route path="sales" element={<SalesHistory />} /> {/* Added */}
             <Route path="reports" element={<Reports />} />
             <Route path="logs" element={<ActivityLogs />} />
           </Route>

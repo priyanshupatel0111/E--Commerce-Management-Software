@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Plus, Edit, Trash } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Inventory = () => {
+    const auth = useContext(AuthContext);
+    const user = auth ? auth.user : null;
     const [products, setProducts] = useState([]);
+
     // Form State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
@@ -21,13 +25,14 @@ const Inventory = () => {
             const res = await axios.get('http://localhost:5000/api/products', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setProducts(res.data);
+            if (Array.isArray(res.data)) {
+                setProducts(res.data);
+            } else {
+                setProducts([]);
+            }
         } catch (error) {
             console.error(error);
-            // Fallback data for demo
-            setProducts([
-                { id: 1, name: 'Premium Watch', sku: 'WATCH-001', buy_price: 100, sell_price: 199.99, current_stock_qty: 10 },
-            ]);
+            setProducts([]);
         }
     };
 
@@ -39,12 +44,21 @@ const Inventory = () => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         try {
+            // Sanitize input: Convert empty strings to 0 or null for numbers
+            const payload = {
+                ...formData,
+                buy_price: formData.buy_price === '' ? 0 : parseFloat(formData.buy_price),
+                sell_price: formData.sell_price === '' ? 0 : parseFloat(formData.sell_price),
+                current_stock_qty: formData.current_stock_qty === '' ? 0 : parseInt(formData.current_stock_qty),
+                low_stock_alert_level: formData.low_stock_alert_level === '' ? 5 : parseInt(formData.low_stock_alert_level)
+            };
+
             if (editingProduct) {
-                await axios.put(`http://localhost:5000/api/products/${editingProduct.id}`, formData, {
+                await axios.put(`http://localhost:5000/api/products/${editingProduct.id}`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                await axios.post('http://localhost:5000/api/products', formData, {
+                await axios.post('http://localhost:5000/api/products', payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
@@ -53,7 +67,8 @@ const Inventory = () => {
             setFormData({ name: '', sku: '', buy_price: '', sell_price: '', current_stock_qty: '', low_stock_alert_level: '' });
             fetchProducts();
         } catch (error) {
-            alert('Failed to save product');
+            console.error(error);
+            alert('Failed to save product: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -83,13 +98,17 @@ const Inventory = () => {
         }
     };
 
+    const canEdit = user?.role && user.role !== 'Watcher';
+
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Inventory Management</h1>
-                <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); }} className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-indigo-700">
-                    <Plus size={20} /> Add Product
-                </button>
+                {canEdit && (
+                    <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); }} className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-indigo-700">
+                        <Plus size={20} /> Add Product
+                    </button>
+                )}
             </div>
 
             <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -117,8 +136,12 @@ const Inventory = () => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.buy_price}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.sell_price}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button onClick={() => handleEdit(product)} className="text-indigo-600 hover:text-indigo-900 mr-4"><Edit size={18} /></button>
-                                    <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900"><Trash size={18} /></button>
+                                    {canEdit && (
+                                        <>
+                                            <button onClick={() => handleEdit(product)} className="text-indigo-600 hover:text-indigo-900 mr-4"><Edit size={18} /></button>
+                                            <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-900"><Trash size={18} /></button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         ))}

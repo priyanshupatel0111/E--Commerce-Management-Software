@@ -55,6 +55,22 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
     }
 });
 
+// Get All Orders - Admin & Watcher
+router.get('/', [verifyToken, authorize(['Admin', 'Watcher'])], async (req, res) => {
+    try {
+        const orders = await Order.findAll({
+            include: [
+                { model: OrderItem, include: [Product] },
+                { model: User, as: 'Employee', attributes: ['username'] } // Assuming association exists
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Get User Orders
 router.get('/my-orders', [verifyToken], async (req, res) => {
     // If customer auth is implemented, this would differ. assuming employee view logic for now

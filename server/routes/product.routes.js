@@ -19,8 +19,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Admin Create
-router.post('/', [verifyToken, authorize('Admin')], async (req, res) => {
+// Admin & Employee Create
+router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
     try {
         const product = await Product.create(req.body);
         await logActivity(req.userId, 'Created Product', `Created product ${product.name} (${product.sku})`);
@@ -30,8 +30,8 @@ router.post('/', [verifyToken, authorize('Admin')], async (req, res) => {
     }
 });
 
-// Admin Update
-router.put('/:id', [verifyToken, authorize('Admin')], async (req, res) => {
+// Admin & Employee Update
+router.put('/:id', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id);
         if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -44,8 +44,8 @@ router.put('/:id', [verifyToken, authorize('Admin')], async (req, res) => {
     }
 });
 
-// Admin Delete
-router.delete('/:id', [verifyToken, authorize('Admin')], async (req, res) => {
+// Admin & Employee Delete
+router.delete('/:id', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
     try {
         const product = await Product.findByPk(req.params.id);
         if (!product) return res.status(404).json({ message: 'Product not found' });

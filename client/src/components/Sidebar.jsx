@@ -15,34 +15,54 @@ const Sidebar = ({ role }) => {
 
     const isActive = (path) => location.pathname === path ? 'bg-indigo-800' : '';
 
+    const getPanelName = (role) => {
+        if (role === 'Admin') return 'Admin Panel';
+        if (role === 'Employee') return 'Employee Panel';
+        if (role === 'Watcher') return 'Watcher Panel';
+        return 'Panel'; // Fallback
+    };
+
     return (
         <div className="w-64 bg-indigo-900 text-white min-h-screen flex flex-col">
-            <div className="p-6 text-2xl font-bold border-b border-indigo-800">Admin Panel</div>
+            <div className="p-6 text-2xl font-bold border-b border-indigo-800">{getPanelName(role)}</div>
             <div className="flex-1 py-4">
-                {role !== 'ReportViewer' && (
-                    <>
-                        <Link to="/admin" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin')}`}>
-                            <LayoutDashboard size={20} /> Dashboard
-                        </Link>
-                        <Link to="/admin/inventory" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/inventory')}`}>
-                            <Package size={20} /> Inventory
-                        </Link>
-                        <Link to="/admin/pos" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/pos')}`}>
-                            <ShoppingCart size={20} /> New Sale (POS)
-                        </Link>
-                        <Link to="/admin/purchases" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/purchases')}`}>
-                            <Truck size={20} /> Purchases
-                        </Link>
-                    </>
+                {/* Dashboard: Everyone */}
+                <Link to="/admin" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin')}`}>
+                    <LayoutDashboard size={20} /> Dashboard
+                </Link>
+
+                {/* Inventory: Everyone */}
+                <Link to="/admin/inventory" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/inventory')}`}>
+                    <Package size={20} /> Inventory
+                </Link>
+
+                {/* POS: Admin & Employee ONLY */}
+                {(role === 'Admin' || role === 'Employee') && (
+                    <Link to="/admin/pos" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/pos')}`}>
+                        <ShoppingCart size={20} /> New Sale (POS)
+                    </Link>
                 )}
 
-                {(role === 'Admin' || role === 'ReportViewer') && (
+                {(role === 'Admin' || role === 'Watcher' || role === 'Employee') && (
+                    <Link to="/admin/sales" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sales')}`}>
+                        <ShoppingCart size={20} /> Sales History
+                    </Link>
+                )}
+
+                {/* Purchases: Everyone */}
+                <Link to="/admin/purchases" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/purchases')}`}>
+                    <Truck size={20} /> Purchases
+                </Link>
+
+                {/* Reports: Admin & Watcher ONLY (Assuming ReportViewer is deprecated or same as Watcher) */}
+                {(role === 'Admin' || role === 'Watcher' || role === 'ReportViewer') && (
                     <Link to="/admin/reports" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/reports')}`}>
                         <FileText size={20} /> Financial Reports
                     </Link>
                 )}
 
-                {role === 'Admin' && (
+                {/* Logs: Admin & Watcher ONLY */}
+                {(role === 'Admin' || role === 'Watcher') && (
                     <Link to="/admin/logs" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/logs')}`}>
                         <Receipt size={20} /> Staff Logs
                     </Link>

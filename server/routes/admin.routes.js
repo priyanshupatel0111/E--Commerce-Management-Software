@@ -3,8 +3,8 @@ const router = express.Router();
 const { ActivityLog, User } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 
-// Get Activity Logs - Admin Only
-router.get('/logs', [verifyToken, authorize('Admin')], async (req, res) => {
+// Get Activity Logs - Admin & Watcher
+router.get('/logs', [verifyToken, authorize(['Admin', 'Watcher'])], async (req, res) => {
     try {
         const logs = await ActivityLog.findAll({
             include: { model: User, attributes: ['username'] },

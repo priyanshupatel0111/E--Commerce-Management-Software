@@ -9,7 +9,9 @@ const seed = async () => {
         // Roles
         const adminRole = await Role.create({ role_name: 'Admin', permissions: { all: true } });
         const staffRole = await Role.create({ role_name: 'Employee', permissions: { pos: true, inventory_view: true } });
-        const viewerRole = await Role.create({ role_name: 'ReportViewer', permissions: { reports: true } });
+        const watcherRole = await Role.create({ role_name: 'Watcher', permissions: { reports: true } });
+        // Keeping ReportViewer for backward compatibility if needed, or just replacing it.
+        // Given the requirement "create new emmplyee and watcher", I'll use Watcher as the prompt name.
 
         // Users
         const salt = bcrypt.genSaltSync(10);

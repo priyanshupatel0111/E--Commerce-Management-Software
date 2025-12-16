@@ -155,7 +155,7 @@ const SoldItemsReport = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.product_name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.units_sold}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-semibold">
-                                        ${Number(item.total_revenue).toFixed(2)}
+                                        Rs {Number(item.total_revenue).toFixed(2)}
                                     </td>
                                 </tr>
                             ))
@@ -169,7 +169,7 @@ const SoldItemsReport = () => {
                         <tr>
                             <td colSpan="3" className="px-6 py-4 text-right text-gray-700">Grand Total Revenue:</td>
                             <td className="px-6 py-4 text-right text-indigo-700 text-lg">
-                                ${grandTotalRevenue.toFixed(2)}
+                                Rs {grandTotalRevenue.toFixed(2)}
                             </td>
                         </tr>
                     </tfoot>

@@ -48,7 +48,7 @@ const Storefront = () => {
                                     <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
                                     <p className="text-gray-600 text-sm mb-4 h-12 overflow-hidden">{product.description}</p>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-2xl font-bold text-indigo-600">${product.sell_price || product.price}</span>
+                                        <span className="text-2xl font-bold text-indigo-600">Rs {product.sell_price || product.price}</span>
                                         {/* Cart Removed */}
                                     </div>
                                 </div>

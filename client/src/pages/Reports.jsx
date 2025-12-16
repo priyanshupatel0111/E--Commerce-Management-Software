@@ -54,7 +54,7 @@ const Reports = () => {
         labels: ['Total Revenue', 'Total Cost'],
         datasets: [
             {
-                label: 'Amount ($)',
+                label: 'Amount (Rs)',
                 data: [stats.sales, stats.purchases],
                 backgroundColor: ['rgba(75, 192, 192, 0.5)', 'rgba(255, 99, 132, 0.5)'],
                 borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
@@ -143,13 +143,13 @@ const Reports = () => {
                 <div className="bg-green-100 p-8 rounded-lg shadow text-center">
                     <h3 className="text-lg font-semibold text-green-800">Total Profit (Gross)</h3>
                     <p className="text-4xl font-bold text-green-900 mt-2">
-                        ${Number(stats.profit).toFixed(2)}
+                        Rs {Number(stats.profit).toFixed(2)}
                     </p>
                 </div>
                 <div className="bg-indigo-100 p-8 rounded-lg shadow text-center">
                     <h3 className="text-lg font-semibold text-indigo-800">Total Revenue</h3>
                     <p className="text-4xl font-bold text-indigo-900 mt-2">
-                        ${Number(stats.sales).toFixed(2)}
+                        Rs {Number(stats.sales).toFixed(2)}
                     </p>
                 </div>
             </div>

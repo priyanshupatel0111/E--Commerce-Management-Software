@@ -11,6 +11,11 @@ const Product = sequelize.define('Product', {
         type: DataTypes.STRING,
         unique: true
     },
+    product_code: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false // Mandatory field
+    },
     name: {
         type: DataTypes.STRING,
         allowNull: false

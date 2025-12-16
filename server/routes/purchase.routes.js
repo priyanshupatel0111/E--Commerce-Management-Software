@@ -4,6 +4,25 @@ const { Purchase, PurchaseItem, Product, sequelize } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
 
+// Get all purchases
+router.get('/', verifyToken, async (req, res) => {
+    try {
+        const purchases = await Purchase.findAll({
+            include: [
+                { model: sequelize.models.Supplier }, // explicit access if not imported directly
+                {
+                    model: PurchaseItem,
+                    include: [Product]
+                }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+        res.json(purchases);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Create Purchase (Restocking) - Admin & Employee
 router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
     const t = await sequelize.transaction();

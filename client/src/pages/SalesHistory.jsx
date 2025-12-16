@@ -65,7 +65,7 @@ const SalesHistory = () => {
                                     ))}
                                 </td>
                                 <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
-                                    ${Number(order.total_amount).toFixed(2)}
+                                    Rs {Number(order.total_amount).toFixed(2)}
                                 </td>
                             </tr>
                         ))}

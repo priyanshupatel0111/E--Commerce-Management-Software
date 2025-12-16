@@ -12,7 +12,7 @@ const Inventory = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState({
-        name: '', sku: '', buy_price: '', sell_price: '', current_stock_qty: '', low_stock_alert_level: ''
+        name: '', sku: '', product_code: '', buy_price: '', sell_price: '', current_stock_qty: '', low_stock_alert_level: ''
     });
 
     useEffect(() => {
@@ -47,6 +47,7 @@ const Inventory = () => {
             // Sanitize input: Convert empty strings to 0 or null for numbers
             const payload = {
                 ...formData,
+                product_code: formData.product_code,
                 buy_price: formData.buy_price === '' ? 0 : parseFloat(formData.buy_price),
                 sell_price: formData.sell_price === '' ? 0 : parseFloat(formData.sell_price),
                 current_stock_qty: formData.current_stock_qty === '' ? 0 : parseInt(formData.current_stock_qty),
@@ -64,7 +65,7 @@ const Inventory = () => {
             }
             setIsModalOpen(false);
             setEditingProduct(null);
-            setFormData({ name: '', sku: '', buy_price: '', sell_price: '', current_stock_qty: '', low_stock_alert_level: '' });
+            setFormData({ name: '', sku: '', product_code: '', buy_price: '', sell_price: '', current_stock_qty: '', low_stock_alert_level: '' });
             fetchProducts();
         } catch (error) {
             console.error(error);
@@ -77,6 +78,7 @@ const Inventory = () => {
         setFormData({
             name: product.name,
             sku: product.sku,
+            product_code: product.product_code || '',
             buy_price: product.buy_price,
             sell_price: product.sell_price,
             current_stock_qty: product.current_stock_qty,
@@ -105,7 +107,7 @@ const Inventory = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Inventory Management</h1>
                 {canEdit && (
-                    <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); }} className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-indigo-700">
+                    <button onClick={() => { setEditingProduct(null); setIsModalOpen(true); setFormData({ name: '', sku: '', product_code: '', buy_price: '', sell_price: '', current_stock_qty: '', low_stock_alert_level: '' }); }} className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-indigo-700">
                         <Plus size={20} /> Add Product
                     </button>
                 )}
@@ -115,6 +117,7 @@ const Inventory = () => {
                 <table className="min-w-full">
                     <thead className="bg-gray-100">
                         <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
@@ -126,6 +129,7 @@ const Inventory = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {products.map(product => (
                             <tr key={product.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.product_code || '-'}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.sku}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -133,8 +137,8 @@ const Inventory = () => {
                                         {product.current_stock_qty}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.buy_price}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.sell_price}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs {product.buy_price}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rs {product.sell_price}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     {canEdit && (
                                         <>
@@ -155,7 +159,10 @@ const Inventory = () => {
                         <h2 className="text-xl font-bold mb-4">{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} className="w-full border p-2 rounded" required />
-                            <input name="sku" placeholder="SKU" value={formData.sku} onChange={handleChange} className="w-full border p-2 rounded" required />
+                            <div className="grid grid-cols-2 gap-4">
+                                <input name="product_code" placeholder="Product ID" value={formData.product_code} onChange={handleChange} className="w-full border p-2 rounded" required />
+                                <input name="sku" placeholder="SKU" value={formData.sku} onChange={handleChange} className="w-full border p-2 rounded" required />
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <input name="buy_price" type="number" placeholder="Buy Price" value={formData.buy_price} onChange={handleChange} className="w-full border p-2 rounded" required />
                                 <input name="sell_price" type="number" placeholder="Sell Price" value={formData.sell_price} onChange={handleChange} className="w-full border p-2 rounded" required />

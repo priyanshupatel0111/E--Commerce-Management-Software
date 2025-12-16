@@ -108,7 +108,7 @@ const POS = () => {
                             <h3 className="font-bold text-lg">{product.name}</h3>
                             <p className="text-gray-500 text-sm mb-2">{product.sku}</p>
                             <div className="flex justify-between items-center">
-                                <span className="text-indigo-600 font-bold">${product.sell_price}</span>
+                                <span className="text-indigo-600 font-bold">Rs {product.sell_price}</span>
                                 <span className={`text-xs px-2 py-1 rounded ${product.current_stock_qty > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                     Stock: {product.current_stock_qty}
                                 </span>
@@ -167,7 +167,7 @@ const POS = () => {
                         <div key={item.id} className="flex justify-between items-center bg-gray-50 p-3 rounded">
                             <div>
                                 <h4 className="font-semibold">{item.name}</h4>
-                                <div className="text-sm text-gray-600">${item.sell_price} x {item.quantity}</div>
+                                <div className="text-sm text-gray-600">Rs {item.sell_price} x {item.quantity}</div>
                             </div>
                             <div className="flex items-center gap-3">
                                 <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:bg-gray-200 rounded"><Minus size={16} /></button>
@@ -183,7 +183,7 @@ const POS = () => {
                 <div className="p-6 bg-gray-50 border-t">
                     <div className="flex justify-between text-xl font-bold mb-4">
                         <span>Total</span>
-                        <span>${total.toFixed(2)}</span>
+                        <span>Rs {total.toFixed(2)}</span>
                     </div>
                     <button
                         onClick={handleCheckout}

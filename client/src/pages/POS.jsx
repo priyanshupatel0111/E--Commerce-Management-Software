@@ -7,9 +7,29 @@ const POS = () => {
     const [cart, setCart] = useState([]);
     const [customerName, setCustomerName] = useState('Walk-in Customer');
 
+    // New Fields
+    const [sellerId, setSellerId] = useState('');
+    const [platform, setPlatform] = useState('Messo');
+
+    // Dynamic Sellers
+    const [availableSellers, setAvailableSellers] = useState([]);
+
     useEffect(() => {
         fetchProducts();
+        fetchSellers();
     }, []);
+
+    const fetchSellers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get('http://localhost:5000/api/sellers', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAvailableSellers(res.data);
+        } catch (error) {
+            console.error('Failed to fetch sellers', error);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -20,7 +40,6 @@ const POS = () => {
             setProducts(res.data);
         } catch (error) {
             console.error(error);
-            // Fallback
             setProducts([
                 { id: 1, name: 'Premium Watch', sku: 'WATCH-001', sell_price: 199.99, current_stock_qty: 10 },
             ]);
@@ -51,11 +70,18 @@ const POS = () => {
     };
 
     const handleCheckout = async () => {
+        if (!sellerId) {
+            alert('Please select a Seller ID to complete the order.');
+            return;
+        }
+
         const token = localStorage.getItem('token');
         try {
             await axios.post('http://localhost:5000/api/orders', {
                 products: cart.map(i => ({ id: i.id, quantity: i.quantity })),
-                customer_id: 1 // Dummy ID for now, ideally create customer first
+                customer_id: 1, // Dummy ID
+                seller_custom_id: sellerId,
+                platform: platform
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -94,14 +120,46 @@ const POS = () => {
 
             {/* Cart Sidebar */}
             <div className="w-1/3 bg-white shadow-xl flex flex-col h-full border-l">
-                <div className="p-6 border-b">
+                <div className="p-6 border-b space-y-4">
                     <h2 className="text-xl font-bold flex items-center gap-2"><ShoppingCart /> Current Order</h2>
+
+                    {/* Customer Name */}
                     <input
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        className="mt-4 w-full border rounded p-2 text-sm bg-gray-50"
+                        className="w-full border rounded p-2 text-sm bg-gray-50"
                         placeholder="Customer Name"
                     />
+
+                    {/* Seller Custom ID */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Seller ID <span className="text-red-500">*</span></label>
+                        <select
+                            value={sellerId}
+                            onChange={(e) => setSellerId(e.target.value)}
+                            className="w-full border rounded p-2 text-sm bg-gray-50"
+                        >
+                            <option value="">Select Seller ID...</option>
+                            {availableSellers.map(s => (
+                                <option key={s.id} value={s.seller_code}>{s.seller_code} - {s.seller_name}</option>
+                            ))}
+                        </select>
+                        {/* Fallback text input removed as selection is now mandatory from the list */}
+                    </div>
+
+                    {/* Platform */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Platform</label>
+                        <select
+                            value={platform}
+                            onChange={(e) => setPlatform(e.target.value)}
+                            className="w-full border rounded p-2 text-sm bg-gray-50"
+                        >
+                            <option value="Messo">Messo</option>
+                            <option value="Amazon">Amazon</option>
+                            <option value="Flipkart">Flipkart</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">

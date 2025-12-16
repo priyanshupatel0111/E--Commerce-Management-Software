@@ -10,6 +10,7 @@ const Supplier = require('./Supplier');
 const Purchase = require('./Purchase');
 const PurchaseItem = require('./PurchaseItem');
 const ActivityLog = require('./ActivityLog');
+const Seller = require('./Seller'); // Added
 
 // User & Role
 Role.hasMany(User, { foreignKey: 'role_id' });
@@ -17,7 +18,7 @@ User.belongsTo(Role, { foreignKey: 'role_id' });
 
 // Order Associations
 User.hasMany(Order, { foreignKey: 'employee_id' });
-Order.belongsTo(User, { foreignKey: 'employee_id' });
+Order.belongsTo(User, { foreignKey: 'employee_id', as: 'Employee' });
 
 Customer.hasMany(Order, { foreignKey: 'customer_id' });
 Order.belongsTo(Customer, { foreignKey: 'customer_id' });
@@ -61,5 +62,6 @@ module.exports = {
     Supplier,
     Purchase,
     PurchaseItem,
-    ActivityLog
+    ActivityLog,
+    Seller // Added
 };

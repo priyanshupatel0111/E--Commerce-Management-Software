@@ -56,15 +56,27 @@ const Sidebar = ({ role }) => {
 
                 {/* Reports: Admin & Watcher ONLY (Assuming ReportViewer is deprecated or same as Watcher) */}
                 {(role === 'Admin' || role === 'Watcher' || role === 'ReportViewer') && (
-                    <Link to="/admin/reports" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/reports')}`}>
-                        <FileText size={20} /> Financial Reports
-                    </Link>
+                    <>
+                        <Link to="/admin/reports" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/reports')}`}>
+                            <FileText size={20} /> Financial Reports
+                        </Link>
+                        <Link to="/admin/sold-items" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sold-items')}`}>
+                            <FileText size={20} /> Sold Items Report
+                        </Link>
+                    </>
                 )}
 
                 {/* Logs: Admin & Watcher ONLY */}
                 {(role === 'Admin' || role === 'Watcher') && (
                     <Link to="/admin/logs" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/logs')}`}>
                         <Receipt size={20} /> Staff Logs
+                    </Link>
+                )}
+
+                {/* Manage Sellers: Admin ONLY */}
+                {role === 'Admin' && (
+                    <Link to="/admin/sellers" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sellers')}`}>
+                        <ShoppingCart size={20} /> Manage Sellers
                     </Link>
                 )}
             </div>

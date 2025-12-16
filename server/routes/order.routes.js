@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Order, OrderItem, Product, sequelize } = require('../models');
+const { Order, OrderItem, Product, User, sequelize } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
 
@@ -8,7 +8,7 @@ const { logActivity } = require('../middleware/logger');
 router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
     const t = await sequelize.transaction();
     try {
-        const { customer_id, products } = req.body; // products: [{ id, quantity }]
+        const { customer_id, products, seller_custom_id, platform } = req.body; // products: [{ id, quantity }]
 
         let total_amount = 0;
         const orderItems = [];
@@ -38,7 +38,9 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
             customer_id,
             employee_id: req.userId,
             total_amount,
-            status: 'Completed'
+            status: 'Completed',
+            seller_custom_id,
+            platform
         }, { transaction: t });
 
         for (const item of orderItems) {
@@ -55,8 +57,8 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
     }
 });
 
-// Get All Orders - Admin & Watcher
-router.get('/', [verifyToken, authorize(['Admin', 'Watcher'])], async (req, res) => {
+// Get All Orders - Admin, Watcher & Employee (to see their own sales or all sales)
+router.get('/', [verifyToken, authorize(['Admin', 'Watcher', 'Employee'])], async (req, res) => {
     try {
         const orders = await Order.findAll({
             include: [

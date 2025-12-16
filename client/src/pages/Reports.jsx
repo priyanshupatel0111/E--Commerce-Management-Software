@@ -6,22 +6,48 @@ import { Bar, Pie } from 'react-chartjs-2';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const Reports = () => {
-    const [stats, setStats] = useState({ sales: 0, purchases: 0, topProducts: [] });
+    const [stats, setStats] = useState({ sales: 0, profit: 0, purchases: 0, topProducts: [] });
+    const [filters, setFilters] = useState({ sellerId: '', platform: '' });
+    const [options, setOptions] = useState({ sellers: [], platforms: [] });
+
+    useEffect(() => {
+        fetchFilters();
+    }, []);
 
     useEffect(() => {
         fetchStats();
-    }, []);
+    }, [filters]);
+
+    const fetchFilters = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get('http://localhost:5000/api/reports/filters', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setOptions(res.data);
+        } catch (error) {
+            console.error("Error fetching filters:", error);
+        }
+    };
 
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/reports/stats', {
+            const params = new URLSearchParams();
+            if (filters.sellerId) params.append('sellerId', filters.sellerId);
+            if (filters.platform) params.append('platform', filters.platform);
+
+            const res = await axios.get(`http://localhost:5000/api/reports/stats?${params.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setStats(res.data);
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const handleFilterChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
     const salesData = {
@@ -57,6 +83,42 @@ const Reports = () => {
         <div>
             <h1 className="text-3xl font-bold mb-6 text-gray-800">Financial Reports</h1>
 
+            {/* Filters */}
+            <div className="bg-white p-4 rounded-lg shadow mb-8 flex gap-4">
+                <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Seller</label>
+                    <select
+                        name="sellerId"
+                        value={filters.sellerId}
+                        onChange={handleFilterChange}
+                        className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                        <option value="">All Sellers</option>
+                        {options.sellers.map((seller) => (
+                            <option key={seller.seller_code} value={seller.seller_code}>
+                                {seller.seller_name} ({seller.seller_code})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Platform</label>
+                    <select
+                        name="platform"
+                        value={filters.platform}
+                        onChange={handleFilterChange}
+                        className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                        <option value="">All Platforms</option>
+                        {options.platforms.map((platform) => (
+                            <option key={platform} value={platform}>
+                                {platform}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-8 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h2 className="text-xl font-bold mb-4 text-gray-700">Financial Overview</h2>
@@ -79,9 +141,9 @@ const Reports = () => {
 
             <div className="grid grid-cols-2 gap-8">
                 <div className="bg-green-100 p-8 rounded-lg shadow text-center">
-                    <h3 className="text-lg font-semibold text-green-800">Total Profit</h3>
+                    <h3 className="text-lg font-semibold text-green-800">Total Profit (Gross)</h3>
                     <p className="text-4xl font-bold text-green-900 mt-2">
-                        ${(stats.sales - stats.purchases).toFixed(2)}
+                        ${Number(stats.profit).toFixed(2)}
                     </p>
                 </div>
                 <div className="bg-indigo-100 p-8 rounded-lg shadow text-center">

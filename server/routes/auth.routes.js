@@ -31,6 +31,7 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({ message: 'Admin registered successfully' });
     } catch (error) {
+        console.error('Registration Error:', error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -67,6 +68,7 @@ router.post('/login', async (req, res) => {
             accessToken: token
         });
     } catch (error) {
+        console.error('Login Error:', error);
         res.status(500).json({ message: error.message });
     }
 });

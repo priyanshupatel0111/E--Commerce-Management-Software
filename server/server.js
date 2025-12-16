@@ -23,7 +23,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/sellers', require('./routes/seller.routes')); // Added
 
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to E-Commerce ERP API' });

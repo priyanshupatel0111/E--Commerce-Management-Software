@@ -11,7 +11,9 @@ import Reports from './pages/Reports';
 import ActivityLogs from './pages/ActivityLogs';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
-import SalesHistory from './pages/SalesHistory'; // Added
+import SalesHistory from './pages/SalesHistory';
+import ManageSellers from './pages/ManageSellers'; // Added // Added
+import SoldItemsReport from './pages/SoldItemsReport'; // Added
 
 function App() {
   return (
@@ -27,10 +29,13 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
+            <Route path="sellers" element={<ManageSellers />} /> {/* Added */}
             <Route path="inventory" element={<Inventory />} />
             <Route path="pos" element={<POS />} />
             <Route path="purchases" element={<Purchases />} />
             <Route path="sales" element={<SalesHistory />} /> {/* Added */}
+            <Route path="sales" element={<SalesHistory />} /> {/* Added */}
+            <Route path="sold-items" element={<SoldItemsReport />} /> {/* Added */}
             <Route path="reports" element={<Reports />} />
             <Route path="logs" element={<ActivityLogs />} />
           </Route>

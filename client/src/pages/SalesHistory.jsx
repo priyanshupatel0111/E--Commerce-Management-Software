@@ -18,6 +18,7 @@ const SalesHistory = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (Array.isArray(res.data)) {
+                console.log('Fetched Orders:', res.data);
                 setOrders(res.data);
             }
         } catch (error) {
@@ -37,9 +38,9 @@ const SalesHistory = () => {
                 <table className="min-w-full">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seller ID</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sold By</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Platform</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
                         </tr>
@@ -48,13 +49,13 @@ const SalesHistory = () => {
                         {orders.map(order => (
                             <tr key={order.id} className="hover:bg-gray-50">
                                 <td className="px-6 py-4 text-sm font-medium text-indigo-600">
-                                    #{order.id}
+                                    {order.seller_custom_id || '-'}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500">
                                     {new Date(order.createdAt).toLocaleString()}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                    {order.Employee?.username || 'Unknown'}
+                                    {order.platform || '-'}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-600">
                                     {order.OrderItems?.map(item => (

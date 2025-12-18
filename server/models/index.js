@@ -11,6 +11,7 @@ const Purchase = require('./Purchase');
 const PurchaseItem = require('./PurchaseItem');
 const ActivityLog = require('./ActivityLog');
 const Seller = require('./Seller'); // Added
+const MiscellaneousExpense = require('./MiscellaneousExpense'); // Added
 
 // User & Role
 Role.hasMany(User, { foreignKey: 'role_id' });
@@ -50,6 +51,10 @@ Product.belongsTo(Category, { foreignKey: 'category_id' });
 User.hasMany(ActivityLog, { foreignKey: 'user_id' });
 ActivityLog.belongsTo(User, { foreignKey: 'user_id' });
 
+// Miscellaneous Expenses
+User.hasMany(MiscellaneousExpense, { foreignKey: 'added_by' });
+MiscellaneousExpense.belongsTo(User, { foreignKey: 'added_by', as: 'AddedBy' });
+
 module.exports = {
     sequelize,
     User,
@@ -63,5 +68,6 @@ module.exports = {
     Purchase,
     PurchaseItem,
     ActivityLog,
-    Seller // Added
+    Seller, // Added
+    MiscellaneousExpense // Added
 };

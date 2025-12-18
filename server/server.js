@@ -26,6 +26,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sellers', require('./routes/seller.routes')); // Added
+app.use('/api/misc-expenses', require('./routes/miscExpense.routes')); // Added
+
 app.use('/api/suppliers', require('./routes/supplier.routes'));
 
 

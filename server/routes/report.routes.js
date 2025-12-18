@@ -83,6 +83,9 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
         // So we keep purchases as is (Total Cost).
         const purchases = await sequelize.query('SELECT SUM(total_cost) as total_costs FROM "Purchases"', { type: sequelize.QueryTypes.SELECT });
 
+        // Miscellaneous Expenses
+        const miscExpenses = await sequelize.query('SELECT SUM(amount) as total_misc FROM "MiscellaneousExpenses"', { type: sequelize.QueryTypes.SELECT });
+
         const topProducts = await sequelize.query(topProductsSql, {
             replacements,
             type: sequelize.QueryTypes.SELECT
@@ -92,6 +95,7 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
             sales: sales[0].total_sales || 0,
             profit: profit[0].total_profit || 0,
             purchases: purchases[0].total_costs || 0,
+            miscExpenses: miscExpenses[0].total_misc || 0,
             topProducts
         });
     } catch (error) {
@@ -104,7 +108,7 @@ router.get('/sold-items', [verifyToken, authorize(['Admin', 'ReportViewer', 'Wat
         const { startDate, endDate } = req.query;
         let query = `
             SELECT 
-                p.id as product_id,
+                p.product_code as product_id,
                 p.name as product_name,
                 SUM(oi.quantity) as units_sold,
                 SUM(oi.quantity * oi.price_at_sale) as total_revenue
@@ -127,7 +131,7 @@ router.get('/sold-items', [verifyToken, authorize(['Admin', 'ReportViewer', 'Wat
         }
 
         query += `
-            GROUP BY p.id, p.name
+            GROUP BY p.product_code, p.name
             ORDER BY total_revenue DESC
         `;
 

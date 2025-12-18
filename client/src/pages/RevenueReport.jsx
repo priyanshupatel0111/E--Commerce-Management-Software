@@ -5,7 +5,7 @@ import { Bar, Pie } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
-const Reports = () => {
+const RevenueReport = () => {
     const [stats, setStats] = useState({ sales: 0, profit: 0, purchases: 0, topProducts: [] });
     const [filters, setFilters] = useState({ sellerId: '', platform: '' });
     const [options, setOptions] = useState({ sellers: [], platforms: [] });
@@ -81,7 +81,7 @@ const Reports = () => {
 
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Financial Reports</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">Revenue Report</h1>
 
             {/* Filters */}
             <div className="bg-white p-4 rounded-lg shadow mb-8 flex gap-4">
@@ -157,4 +157,4 @@ const Reports = () => {
     );
 };
 
-export default Reports;
+export default RevenueReport;

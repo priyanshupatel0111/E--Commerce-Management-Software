@@ -66,7 +66,7 @@ const Purchases = () => {
     };
 
     const handleAddItem = () => {
-        setSelectedItems([...selectedItems, { product_id: '', quantity: 1, cost: 0 }]);
+        setSelectedItems([...selectedItems, { product_id: '', quantity: '', cost: '' }]);
     };
 
     const updateItem = (index, field, value) => {
@@ -97,6 +97,26 @@ const Purchases = () => {
         if (!supplierId) {
             alert('Please select a supplier');
             return;
+        }
+
+        if (selectedItems.length === 0) {
+            alert('Please add at least one item to the purchase.');
+            return;
+        }
+
+        for (const item of selectedItems) {
+            if (!item.product_id) {
+                alert('Please select a product for all items.');
+                return;
+            }
+            if (!item.quantity || item.quantity <= 0) {
+                alert('Quantity must be greater than 0 for all items.');
+                return;
+            }
+            if (!item.cost || item.cost <= 0) {
+                alert('Cost must be greater than 0 for all items.');
+                return;
+            }
         }
 
         const token = localStorage.getItem('token');
@@ -228,10 +248,10 @@ const Purchases = () => {
                                             required
                                         >
                                             <option value="">Select Product...</option>
-                                            {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
+                                            {products.map(p => <option key={p.id} value={p.id}>{p.name} (ID: {p.product_code})</option>)}
                                         </select>
-                                        <input type="number" placeholder="Qty" className="border p-2 rounded w-24" value={item.quantity} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} required />
-                                        <input type="number" placeholder="Cost" className="border p-2 rounded w-24" value={item.cost} onChange={e => updateItem(idx, 'cost', parseFloat(e.target.value) || 0)} required />
+                                        <input type="number" placeholder="Qty" className="border p-2 rounded w-24" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value === '' ? '' : parseInt(e.target.value))} required />
+                                        <input type="number" placeholder="Cost" className="border p-2 rounded w-24" value={item.cost} onChange={e => updateItem(idx, 'cost', e.target.value === '' ? '' : parseFloat(e.target.value))} required />
                                     </div>
                                 ))}
                                 <button type="button" onClick={handleAddItem} className="text-indigo-600 text-sm hover:underline">+ Add Item</button>

@@ -57,13 +57,23 @@ const Sidebar = ({ role }) => {
                 {/* Reports: Admin & Watcher ONLY (Assuming ReportViewer is deprecated or same as Watcher) */}
                 {(role === 'Admin' || role === 'Watcher' || role === 'ReportViewer') && (
                     <>
-                        <Link to="/admin/reports" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/reports')}`}>
-                            <FileText size={20} /> Financial Reports
+                        <Link to="/admin/revenue" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/revenue')}`}>
+                            <FileText size={20} /> Revenue Report
+                        </Link>
+                        <Link to="/admin/expenses" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/expenses')}`}>
+                            <FileText size={20} /> Expense Report
                         </Link>
                         <Link to="/admin/sold-items" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sold-items')}`}>
                             <FileText size={20} /> Sold Items Report
                         </Link>
                     </>
+                )}
+
+                {/* Misc Expenses: Admin & Employee */}
+                {(role === 'Admin' || role === 'Employee') && (
+                    <Link to="/admin/misc-expenses" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/misc-expenses')}`}>
+                        <Receipt size={20} /> Misc. Expenses
+                    </Link>
                 )}
 
                 {/* Logs: Admin & Watcher ONLY */}

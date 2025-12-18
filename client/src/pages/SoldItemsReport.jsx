@@ -89,6 +89,36 @@ const SoldItemsReport = () => {
     // I will use a ref or just pass args to `fetchSoldItems` optionally.
 
 
+    const downloadCSV = () => {
+        if (soldItems.length === 0) {
+            alert("No data available to download.");
+            return;
+        }
+
+        const headers = ["Product ID", "Product Name", "Units Sold", "Total Revenue"];
+        const rows = soldItems.map(item => [
+            item.product_id,
+            `"${item.product_name.replace(/"/g, '""')}"`, // Handle commas/quotes in name
+            item.units_sold,
+            item.total_revenue
+        ]);
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `sold_items_report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const grandTotalRevenue = soldItems.reduce((acc, item) => acc + Number(item.total_revenue), 0);
 
     return (
@@ -129,6 +159,12 @@ const SoldItemsReport = () => {
                         className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition"
                     >
                         Clear
+                    </button>
+                    <button
+                        onClick={downloadCSV}
+                        className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+                    >
+                        Download Report
                     </button>
                 </div>
             </div>

@@ -16,6 +16,7 @@ import SalesHistory from './pages/SalesHistory';
 import ManageSellers from './pages/ManageSellers'; // Added // Added
 import SoldItemsReport from './pages/SoldItemsReport'; // Added
 import MiscellaneousExpenses from './pages/MiscellaneousExpenses'; // Added
+import Returns from './pages/Returns'; // Added
 
 
 function App() {
@@ -37,13 +38,12 @@ function App() {
             <Route path="pos" element={<POS />} />
             <Route path="purchases" element={<Purchases />} />
             <Route path="sales" element={<SalesHistory />} /> {/* Added */}
-            <Route path="sales" element={<SalesHistory />} /> {/* Added */}
-            <Route path="sales" element={<SalesHistory />} /> {/* Added */}
             <Route path="sold-items" element={<SoldItemsReport />} /> {/* Added */}
             <Route path="misc-expenses" element={<MiscellaneousExpenses />} /> {/* Added */}
             <Route path="revenue" element={<RevenueReport />} />
             <Route path="expenses" element={<ExpenseReport />} />
             <Route path="logs" element={<ActivityLogs />} />
+            <Route path="returns" element={<Returns />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />

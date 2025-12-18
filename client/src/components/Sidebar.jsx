@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Truck, Receipt, FileText, Home, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Truck, Receipt, FileText, Home, LogOut, Box } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Sidebar = ({ role }) => {
@@ -65,6 +65,9 @@ const Sidebar = ({ role }) => {
                         </Link>
                         <Link to="/admin/sold-items" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sold-items')}`}>
                             <FileText size={20} /> Sold Items Report
+                        </Link>
+                        <Link to="/admin/returns" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/returns')}`}>
+                            <Box size={20} /> Returns
                         </Link>
                     </>
                 )}

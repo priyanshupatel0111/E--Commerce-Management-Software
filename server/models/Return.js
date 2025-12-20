@@ -43,6 +43,11 @@ const Return = sequelize.define('Return', {
     return_date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
+    },
+    product_quality: {
+        type: DataTypes.ENUM('Good', 'Damaged', 'Not send Product'),
+        allowNull: false,
+        defaultValue: 'Good'
     }
 });
 

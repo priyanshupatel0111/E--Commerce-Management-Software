@@ -79,4 +79,27 @@ router.get('/my-orders', [verifyToken], async (req, res) => {
     res.status(501).json({ message: 'Not implemented' });
 });
 
+// Get Single Order by ID - Admin, Watcher & Employee
+router.get('/:id', [verifyToken, authorize(['Admin', 'Watcher', 'Employee'])], async (req, res) => {
+    try {
+        const order = await Order.findByPk(req.params.id, {
+            include: [
+                {
+                    model: OrderItem,
+                    include: [{ model: Product }]
+                },
+                { model: User, as: 'Employee', attributes: ['username'] }
+            ]
+        });
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;

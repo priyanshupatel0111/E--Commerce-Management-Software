@@ -17,6 +17,7 @@ import ManageSellers from './pages/ManageSellers'; // Added // Added
 import SoldItemsReport from './pages/SoldItemsReport'; // Added
 import MiscellaneousExpenses from './pages/MiscellaneousExpenses'; // Added
 import Returns from './pages/Returns'; // Added
+import ReturnAnalysis from './pages/ReturnAnalysis';
 
 
 function App() {
@@ -44,6 +45,8 @@ function App() {
             <Route path="expenses" element={<ExpenseReport />} />
             <Route path="logs" element={<ActivityLogs />} />
             <Route path="returns" element={<Returns />} />
+            <Route path="return-analysis" element={<ReturnAnalysis />} />
+            <Route path="return-analysis/:orderId" element={<ReturnAnalysis />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />

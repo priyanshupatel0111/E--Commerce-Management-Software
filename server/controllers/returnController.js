@@ -2,16 +2,22 @@ const { Return, Order, Product, OrderItem } = require('../models');
 
 exports.createReturn = async (req, res) => {
     try {
-        const { order_id, product_id, quantity, reason, status } = req.body;
+        const { order_id, product_id, quantity, reason, status, product_quality } = req.body;
+        console.log('DEBUG: Creating Return:', { order_id, product_id, quantity, status, product_quality });
 
-        const order = await Order.findByPk(order_id);
+        const oId = parseInt(order_id);
+        const pId = parseInt(product_id);
+
+        const order = await Order.findByPk(oId);
+        console.log(`DEBUG: Order lookup for ID ${oId}:`, order ? 'Found' : 'NULL');
+
         if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(404).json({ message: `Order not found (ID: ${order_id})` });
         }
 
-        const product = await Product.findByPk(product_id);
+        const product = await Product.findByPk(pId);
         if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ message: `Product not found (ID: ${product_id})` });
         }
 
         const newReturn = await Return.create({
@@ -20,6 +26,7 @@ exports.createReturn = async (req, res) => {
             quantity,
             reason,
             status, // 'Refund' or 'Replaced'
+            product_quality,
             return_date: new Date()
         });
 
@@ -27,9 +34,13 @@ exports.createReturn = async (req, res) => {
         // If Refund: We get stock back.
         // If Replaced: We get one back, give one out. Net 0 (assuming faulty item counts as stock? Probably not, but let's keep it simple).
         // For now, I'll only increment stock on Refund.
-        if (status === 'Refund') {
-            product.stock += parseInt(quantity);
+        if (status === 'Refund' && product_quality === 'Good') {
+            console.log(`DEBUG: Restocking product ${pId}. Current: ${product.current_stock_qty}, Adding: ${quantity}`);
+            product.current_stock_qty = (product.current_stock_qty || 0) + parseInt(quantity);
             await product.save();
+            console.log(`DEBUG: New stock: ${product.current_stock_qty}`);
+        } else {
+            console.log(`DEBUG: No restock. Status: ${status}, Quality: ${product_quality}`);
         }
 
         res.status(201).json(newReturn);

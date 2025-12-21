@@ -18,6 +18,8 @@ import SoldItemsReport from './pages/SoldItemsReport'; // Added
 import MiscellaneousExpenses from './pages/MiscellaneousExpenses'; // Added
 import Returns from './pages/Returns'; // Added
 import ReturnAnalysis from './pages/ReturnAnalysis';
+import ReturnReport from './pages/ReturnReport'; // Added
+import ErrorBoundary from './components/ErrorBoundary'; // Added
 
 
 function App() {
@@ -31,7 +33,11 @@ function App() {
           <Route path="/signup" element={<Signup />} />
 
           {/* Protected Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={
+            <ErrorBoundary>
+              <AdminLayout />
+            </ErrorBoundary>
+          }>
             <Route index element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="sellers" element={<ManageSellers />} /> {/* Added */}
@@ -47,6 +53,7 @@ function App() {
             <Route path="returns" element={<Returns />} />
             <Route path="return-analysis" element={<ReturnAnalysis />} />
             <Route path="return-analysis/:orderId" element={<ReturnAnalysis />} />
+            <Route path="return-report" element={<ReturnReport />} /> {/* Added */}
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />

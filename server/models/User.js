@@ -18,6 +18,13 @@ const User = sequelize.define('User', {
     },
     last_login_time: {
         type: DataTypes.DATE
+    },
+    role_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Roles', // 'Roles' refers to table name
+            key: 'id',
+        }
     }
 });
 

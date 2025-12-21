@@ -7,6 +7,7 @@ import { Plus, X, Check, XCircle, Search } from 'lucide-react';
 const Returns = () => {
     const [returns, setReturns] = useState([]);
     const [products, setProducts] = useState([]);
+    const [sellers, setSellers] = useState([]); // New state for sellers
 
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +21,9 @@ const Returns = () => {
         quantity: 1,
         reason: '',
         status: 'Refund',
-        product_quality: 'Good'
+        product_quality: 'Good',
+        seller_id: '',
+        platform: 'Meesho'
     });
 
     const fetchReturns = async () => {
@@ -47,9 +50,31 @@ const Returns = () => {
         }
     };
 
+    const fetchSellers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.warn("No token found in localStorage");
+                return;
+            }
+            const response = await axios.get('http://localhost:5000/api/sellers', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            console.log("Fetched sellers:", response.data);
+            if (Array.isArray(response.data)) {
+                setSellers(response.data);
+            } else {
+                console.error("Sellers response is not an array:", response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching sellers:', error);
+        }
+    };
+
     useEffect(() => {
         fetchReturns();
         fetchProducts();
+        fetchSellers();
     }, [token]);
 
     const handleCreateReturn = async (e) => {
@@ -66,7 +91,9 @@ const Returns = () => {
                 quantity: 1,
                 reason: '',
                 status: 'Refund',
-                product_quality: 'Good'
+                product_quality: 'Good',
+                seller_id: '',
+                platform: 'Meesho'
             });
             alert('Return processed successfully');
         } catch (error) {
@@ -210,6 +237,39 @@ const Returns = () => {
                                     <option value="Damaged">Damaged</option>
                                     <option value="Not send Product">Not send Product</option>
                                 </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Seller ID</label>
+                                    <select
+                                        required
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        value={newReturn.seller_id}
+                                        onChange={(e) => setNewReturn({ ...newReturn, seller_id: e.target.value })}
+                                    >
+                                        <option value="">Select Seller</option>
+                                        {sellers.map(s => (
+                                            <option key={s.id} value={s.seller_code}>{s.seller_code} - {s.seller_name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                                    <select
+                                        required
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        value={newReturn.platform}
+                                        onChange={(e) => setNewReturn({ ...newReturn, platform: e.target.value })}
+                                    >
+                                        <option value="">Select Platform</option>
+                                        <option value="Amazon">Amazon</option>
+                                        <option value="Flipkart">Flipkart</option>
+                                        <option value="Meesho">Meesho</option>
+                                        <option value="Website">Website</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div>

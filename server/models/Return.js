@@ -48,6 +48,14 @@ const Return = sequelize.define('Return', {
         type: DataTypes.ENUM('Good', 'Damaged', 'Not send Product'),
         allowNull: false,
         defaultValue: 'Good'
+    },
+    seller_id: {
+        type: DataTypes.STRING,
+        allowNull: true // Allow null for legacy records or if not applicable
+    },
+    platform: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 

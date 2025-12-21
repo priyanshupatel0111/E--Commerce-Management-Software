@@ -13,6 +13,7 @@ const ActivityLog = require('./ActivityLog');
 const Seller = require('./Seller'); // Added
 const MiscellaneousExpense = require('./MiscellaneousExpense'); // Added
 const Return = require('./Return'); // Added
+const ReturnAnalysis = require('./ReturnAnalysis'); // Added
 
 // User & Role
 Role.hasMany(User, { foreignKey: 'role_id' });
@@ -37,6 +38,10 @@ Return.belongsTo(Order, { foreignKey: 'order_id' });
 
 Product.hasMany(Return, { foreignKey: 'product_id' });
 Return.belongsTo(Product, { foreignKey: 'product_id' });
+
+// Return Analysis Associations
+Order.hasOne(ReturnAnalysis, { foreignKey: 'order_id' });
+ReturnAnalysis.belongsTo(Order, { foreignKey: 'order_id' });
 
 // Purchase Associations
 Supplier.hasMany(Purchase, { foreignKey: 'supplier_id' });
@@ -78,5 +83,6 @@ module.exports = {
     ActivityLog,
     Seller, // Added
     MiscellaneousExpense, // Added
-    Return // Added
+    Return, // Added
+    ReturnAnalysis // Added
 };

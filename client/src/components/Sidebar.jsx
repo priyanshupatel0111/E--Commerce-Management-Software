@@ -72,6 +72,9 @@ const Sidebar = ({ role }) => {
                         <Link to="/admin/return-analysis" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/return-analysis')}`}>
                             <Box size={20} /> Return Analysis
                         </Link>
+                        <Link to="/admin/return-report" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/return-report')}`}>
+                            <FileText size={20} /> Return Report
+                        </Link>
                     </>
                 )}
 

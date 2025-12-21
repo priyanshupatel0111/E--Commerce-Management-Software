@@ -2,8 +2,8 @@ const { Return, Order, Product, OrderItem } = require('../models');
 
 exports.createReturn = async (req, res) => {
     try {
-        const { order_id, product_id, quantity, reason, status, product_quality } = req.body;
-        console.log('DEBUG: Creating Return:', { order_id, product_id, quantity, status, product_quality });
+        const { order_id, product_id, quantity, reason, status, product_quality, seller_id, platform } = req.body;
+        console.log('DEBUG: Creating Return:', { order_id, product_id, quantity, status, product_quality, seller_id, platform });
 
         const oId = parseInt(order_id);
         const pId = parseInt(product_id);
@@ -27,6 +27,8 @@ exports.createReturn = async (req, res) => {
             reason,
             status, // 'Refund' or 'Replaced'
             product_quality,
+            seller_id,
+            platform,
             return_date: new Date()
         });
 

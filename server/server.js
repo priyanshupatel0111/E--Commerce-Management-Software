@@ -29,10 +29,15 @@ app.use('/api/users', userRoutes);
 app.use('/api/sellers', require('./routes/seller.routes')); // Added
 app.use('/api/misc-expenses', require('./routes/miscExpense.routes')); // Added
 app.use('/api/returns', returnRoutes); // Added
-app.use('/api/return-analysis', require('./routes/returnAnalysis.routes')); // Added
+
+
+const superAdminRoutes = require('./routes/superadmin.routes');
+const { verifyToken, authorize } = require('./middleware/auth');
+
+app.use('/api/superadmin', verifyToken, authorize(['SUPER_ADMIN']), superAdminRoutes);
+app.use('/api/tenants', require('./routes/tenant.routes'));
 
 app.use('/api/suppliers', require('./routes/supplier.routes'));
-
 
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to E-Commerce ERP API' });

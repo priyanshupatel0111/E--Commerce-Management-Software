@@ -5,7 +5,6 @@ import { ShoppingCart, Plus, Minus, Trash } from 'lucide-react';
 const POS = () => {
     const [products, setProducts] = useState([]);
     const [cart, setCart] = useState([]);
-    const [customerName, setCustomerName] = useState('Walk-in Customer');
 
     // New Fields
     const [sellerId, setSellerId] = useState('');
@@ -123,13 +122,6 @@ const POS = () => {
                 <div className="p-6 border-b space-y-4">
                     <h2 className="text-xl font-bold flex items-center gap-2"><ShoppingCart /> Current Order</h2>
 
-                    {/* Customer Name */}
-                    <input
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full border rounded p-2 text-sm bg-gray-50"
-                        placeholder="Customer Name"
-                    />
 
                     {/* Seller Custom ID */}
                     <div>

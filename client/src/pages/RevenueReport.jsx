@@ -6,7 +6,7 @@ import { Bar, Pie } from 'react-chartjs-2';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const RevenueReport = () => {
-    const [stats, setStats] = useState({ sales: 0, profit: 0, purchases: 0, topProducts: [] });
+    const [stats, setStats] = useState({ sales: 0, profit: 0, purchases: 0, refundFromPlatform: 0, topProducts: [] });
     const [filters, setFilters] = useState({ sellerId: '', platform: '' });
     const [options, setOptions] = useState({ sellers: [], platforms: [] });
 
@@ -139,7 +139,7 @@ const RevenueReport = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-3 gap-8">
                 <div className="bg-green-100 p-8 rounded-lg shadow text-center">
                     <h3 className="text-lg font-semibold text-green-800">Total Profit (Gross)</h3>
                     <p className="text-4xl font-bold text-green-900 mt-2">
@@ -150,6 +150,12 @@ const RevenueReport = () => {
                     <h3 className="text-lg font-semibold text-indigo-800">Total Revenue</h3>
                     <p className="text-4xl font-bold text-indigo-900 mt-2">
                         Rs {Number(stats.sales).toFixed(2)}
+                    </p>
+                </div>
+                <div className="bg-teal-100 p-8 rounded-lg shadow text-center">
+                    <h3 className="text-lg font-semibold text-teal-800">Refund from Platform</h3>
+                    <p className="text-4xl font-bold text-teal-900 mt-2">
+                        Rs {Number(stats.refundFromPlatform).toFixed(2)}
                     </p>
                 </div>
             </div>

@@ -7,6 +7,14 @@ const Product = sequelize.define('Product', {
         primaryKey: true,
         autoIncrement: true
     },
+    tenant_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Tenants',
+            key: 'id'
+        }
+    },
     sku: {
         type: DataTypes.STRING,
         unique: true

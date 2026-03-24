@@ -86,6 +86,12 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
         // Miscellaneous Expenses
         const miscExpenses = await sequelize.query('SELECT SUM(amount) as total_misc FROM "MiscellaneousExpenses"', { type: sequelize.QueryTypes.SELECT });
 
+        // Return Loss from Returns table
+        const returnLoss = await sequelize.query('SELECT SUM(loss) as total_loss FROM "Returns"', { type: sequelize.QueryTypes.SELECT });
+
+        // Refund from Platform from Returns table
+        const refundFromPlatform = await sequelize.query('SELECT SUM(refund_from_platform) as total_refund FROM "Returns"', { type: sequelize.QueryTypes.SELECT });
+
         const topProducts = await sequelize.query(topProductsSql, {
             replacements,
             type: sequelize.QueryTypes.SELECT
@@ -96,6 +102,8 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
             profit: profit[0].total_profit || 0,
             purchases: purchases[0].total_costs || 0,
             miscExpenses: miscExpenses[0].total_misc || 0,
+            returnLoss: returnLoss[0].total_loss || 0,
+            refundFromPlatform: refundFromPlatform[0].total_refund || 0,
             topProducts
         });
     } catch (error) {

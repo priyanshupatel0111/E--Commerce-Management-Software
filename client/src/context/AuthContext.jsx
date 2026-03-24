@@ -19,7 +19,12 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+            const tenantContext = JSON.parse(localStorage.getItem('tenantContext') || '{}');
+            const res = await axios.post('http://localhost:5000/api/auth/login', { 
+                username, 
+                password,
+                tenant_id: tenantContext.id 
+            });
             setUser(res.data);
             localStorage.setItem('user', JSON.stringify(res.data));
             localStorage.setItem('token', res.data.accessToken);

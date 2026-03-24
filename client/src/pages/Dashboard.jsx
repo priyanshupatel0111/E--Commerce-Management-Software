@@ -6,11 +6,13 @@ import { AuthContext } from '../context/AuthContext';
 
 const Dashboard = () => {
     const [lastLogin, setLastLogin] = useState(null);
+    const [tenantName, setTenantName] = useState('Admin');
 
     useEffect(() => {
-        // Fetch last login or user data. 
-        // Ideally we would fetch logs, but we can also just fetch users and sort by last_login_time if that field is populated.
-        // Or fetch latest 'LOGIN' activity log. Let's try fetching latest log for now.
+        const stored = localStorage.getItem('tenantContext');
+        if (stored) {
+            try { setTenantName(JSON.parse(stored).name); } catch(e) {}
+        }
         fetchLastLogin();
     }, []);
 
@@ -39,7 +41,7 @@ const Dashboard = () => {
                 {({ user }) => (
                     <div className="mb-6">
                         <h1 className="text-3xl font-bold text-gray-800">
-                            {user?.role === 'Admin' ? 'Admin Dashboard' :
+                            {user?.role === 'Admin' || user?.role === 'TENANT_ADMIN' ? `${tenantName} Dashboard` :
                                 user?.role === 'Employee' ? 'Employee Dashboard' :
                                     user?.role === 'Watcher' ? 'Watcher Dashboard' : 'Dashboard'}
                         </h1>

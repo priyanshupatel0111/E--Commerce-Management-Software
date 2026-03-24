@@ -11,12 +11,18 @@ const verifyToken = (req, res, next) => {
     // Bearer <token>
     const tokenString = token.split(' ')[1];
 
-    jwt.verify(tokenString, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(tokenString, process.env.JWT_SECRET || 'secret123', (err, decoded) => {
         if (err) {
             return res.status(401).json({ message: 'Unauthorized!' });
         }
         req.userId = decoded.id;
         req.userRole = decoded.role;
+        req.user = {
+            id: decoded.id,
+            role_id: decoded.role_id,
+            tenant_id: decoded.tenant_id,
+            role_name: decoded.role
+        };
         next();
     });
 };

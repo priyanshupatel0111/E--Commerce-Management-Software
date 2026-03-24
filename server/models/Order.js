@@ -7,6 +7,14 @@ const Order = sequelize.define('Order', {
         primaryKey: true,
         autoIncrement: true
     },
+    tenant_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Tenants',
+            key: 'id'
+        }
+    },
     order_date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

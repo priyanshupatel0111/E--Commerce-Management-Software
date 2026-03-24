@@ -7,13 +7,17 @@ const Return = sequelize.define('Return', {
         primaryKey: true,
         autoIncrement: true
     },
-    order_id: {
+    tenant_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
-            model: 'Orders', // Assuming table name is Orders
+            model: 'Tenants',
             key: 'id'
         }
+    },
+    order_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     product_id: {
         type: DataTypes.INTEGER,
@@ -34,7 +38,8 @@ const Return = sequelize.define('Return', {
     },
     status: {
         type: DataTypes.ENUM('Refund', 'Replaced'),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 'Refund'
     },
     refund_amount: {
         type: DataTypes.DECIMAL(10, 2),
@@ -51,11 +56,21 @@ const Return = sequelize.define('Return', {
     },
     seller_id: {
         type: DataTypes.STRING,
-        allowNull: true // Allow null for legacy records or if not applicable
+        allowNull: true
     },
     platform: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    loss: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        defaultValue: 0
+    },
+    refund_from_platform: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        defaultValue: 0
     }
 });
 

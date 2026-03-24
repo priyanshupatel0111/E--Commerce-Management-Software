@@ -6,7 +6,7 @@ import { Doughnut } from 'react-chartjs-2';
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const ExpenseReport = () => {
-    const [stats, setStats] = useState({ sales: 0, profit: 0, purchases: 0, miscExpenses: 0, topProducts: [] });
+    const [stats, setStats] = useState({ sales: 0, profit: 0, purchases: 0, miscExpenses: 0, returnLoss: 0, topProducts: [] });
 
     useEffect(() => {
         fetchStats();
@@ -26,17 +26,19 @@ const ExpenseReport = () => {
     };
 
     const expenseData = {
-        labels: ['Purchases (Cost of Goods)', 'Misc. Expenses'],
+        labels: ['Purchases (Cost of Goods)', 'Misc. Expenses', 'Return Loss'],
         datasets: [
             {
-                data: [stats.purchases, stats.miscExpenses],
+                data: [stats.purchases, stats.miscExpenses, stats.returnLoss],
                 backgroundColor: [
                     '#FF6384',
                     '#FFCE56',
+                    '#EF4444',
                 ],
                 hoverBackgroundColor: [
                     '#FF6384',
                     '#FFCE56',
+                    '#EF4444',
                 ],
             },
         ],
@@ -59,7 +61,7 @@ const ExpenseReport = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-3 gap-8">
                 <div className="bg-red-100 p-8 rounded-lg shadow text-center">
                     <h3 className="text-lg font-semibold text-red-800">Total Misc. Expenses</h3>
                     <p className="text-4xl font-bold text-red-900 mt-2">
@@ -67,9 +69,15 @@ const ExpenseReport = () => {
                     </p>
                 </div>
                 <div className="bg-orange-100 p-8 rounded-lg shadow text-center">
-                    <h3 className="text-lg font-semibold text-orange-800">Total Purchases cost</h3>
+                    <h3 className="text-lg font-semibold text-orange-800">Total Purchases Cost</h3>
                     <p className="text-4xl font-bold text-orange-900 mt-2">
                         Rs {Number(stats.purchases).toFixed(2)}
+                    </p>
+                </div>
+                <div className="bg-rose-100 p-8 rounded-lg shadow text-center">
+                    <h3 className="text-lg font-semibold text-rose-800">Total Return Loss</h3>
+                    <p className="text-4xl font-bold text-rose-900 mt-2">
+                        Rs {Number(stats.returnLoss).toFixed(2)}
                     </p>
                 </div>
             </div>

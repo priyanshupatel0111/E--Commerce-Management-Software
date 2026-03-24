@@ -7,6 +7,14 @@ const Purchase = sequelize.define('Purchase', {
         primaryKey: true,
         autoIncrement: true
     },
+    tenant_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Tenants',
+            key: 'id'
+        }
+    },
     purchase_date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

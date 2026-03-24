@@ -1,4 +1,7 @@
 const sequelize = require('../config/database');
+const Tenant = require('./Tenant'); // Added
+const Permission = require('./Permission'); // Added
+const RolePermission = require('./RolePermission'); // Added
 const User = require('./User');
 const Role = require('./Role');
 const Category = require('./Category');
@@ -13,7 +16,17 @@ const ActivityLog = require('./ActivityLog');
 const Seller = require('./Seller'); // Added
 const MiscellaneousExpense = require('./MiscellaneousExpense'); // Added
 const Return = require('./Return'); // Added
-const ReturnAnalysis = require('./ReturnAnalysis'); // Added
+
+// Tenant Relationships
+const tenantModels = [User, Category, Product, Customer, Order, OrderItem, Supplier, Purchase, PurchaseItem, ActivityLog, Seller, MiscellaneousExpense, Return];
+tenantModels.forEach(Model => {
+    Tenant.hasMany(Model, { foreignKey: 'tenant_id' });
+    Model.belongsTo(Tenant, { foreignKey: 'tenant_id' });
+});
+
+// RBAC Relationships
+Role.belongsToMany(Permission, { through: RolePermission, foreignKey: 'role_id' });
+Permission.belongsToMany(Role, { through: RolePermission, foreignKey: 'permission_id' });
 
 // User & Role
 Role.hasMany(User, { foreignKey: 'role_id' });
@@ -39,10 +52,6 @@ Return.belongsTo(Order, { foreignKey: 'order_id' });
 Product.hasMany(Return, { foreignKey: 'product_id' });
 Return.belongsTo(Product, { foreignKey: 'product_id' });
 
-// Return Analysis Associations
-Order.hasOne(ReturnAnalysis, { foreignKey: 'order_id' });
-ReturnAnalysis.belongsTo(Order, { foreignKey: 'order_id' });
-
 // Purchase Associations
 Supplier.hasMany(Purchase, { foreignKey: 'supplier_id' });
 Purchase.belongsTo(Supplier, { foreignKey: 'supplier_id' });
@@ -54,10 +63,7 @@ Product.hasMany(PurchaseItem, { foreignKey: 'product_id' });
 PurchaseItem.belongsTo(Product, { foreignKey: 'product_id' });
 
 // Inventory/Categories
-Category.hasMany(Product, { foreignKey: 'category_id' }); // Assuming category_id in products as implicitly needed? 
-// Wait, prompt said "categories: id, name", "products: id... no category_id listed explicitly but implied by relationship?" 
-// Usually products have category. I'll add Association but check if Product model has category_id. 
-// Sequelize creates FK automatically if defined here.
+Category.hasMany(Product, { foreignKey: 'category_id' }); 
 Product.belongsTo(Category, { foreignKey: 'category_id' });
 
 // Logs
@@ -70,6 +76,9 @@ MiscellaneousExpense.belongsTo(User, { foreignKey: 'added_by', as: 'AddedBy' });
 
 module.exports = {
     sequelize,
+    Tenant,
+    Permission,
+    RolePermission,
     User,
     Role,
     Category,
@@ -81,8 +90,7 @@ module.exports = {
     Purchase,
     PurchaseItem,
     ActivityLog,
-    Seller, // Added
-    MiscellaneousExpense, // Added
-    Return, // Added
-    ReturnAnalysis // Added
+    Seller, 
+    MiscellaneousExpense, 
+    Return 
 };

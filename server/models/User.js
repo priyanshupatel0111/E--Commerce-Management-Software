@@ -7,6 +7,14 @@ const User = sequelize.define('User', {
         primaryKey: true,
         autoIncrement: true
     },
+    tenant_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Tenants',
+            key: 'id'
+        }
+    },
     username: {
         type: DataTypes.STRING,
         allowNull: false,

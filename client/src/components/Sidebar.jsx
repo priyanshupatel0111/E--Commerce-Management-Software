@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Truck, Receipt, FileText, Home, LogOut, Box } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
@@ -15,11 +15,18 @@ const Sidebar = ({ role }) => {
 
     const isActive = (path) => location.pathname === path ? 'bg-indigo-800' : '';
 
+    const [tenantName, setTenantName] = useState(null);
+
+    useEffect(() => {
+        const stored = localStorage.getItem('tenantContext');
+        if (stored) {
+            try { setTenantName(JSON.parse(stored).name); } catch(e) {}
+        }
+    }, []);
+
     const getPanelName = (role) => {
-        if (role === 'Admin') return 'Admin Panel';
-        if (role === 'Employee') return 'Employee Panel';
-        if (role === 'Watcher') return 'Watcher Panel';
-        return 'Panel'; // Fallback
+        const base = tenantName ? tenantName : (role === 'Admin' ? 'Admin' : role);
+        return `${base} Panel`;
     };
 
     return (
@@ -68,12 +75,6 @@ const Sidebar = ({ role }) => {
                         </Link>
                         <Link to="/admin/returns" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/returns')}`}>
                             <Box size={20} /> Returns
-                        </Link>
-                        <Link to="/admin/return-analysis" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/return-analysis')}`}>
-                            <Box size={20} /> Return Analysis
-                        </Link>
-                        <Link to="/admin/return-report" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/return-report')}`}>
-                            <FileText size={20} /> Return Report
                         </Link>
                     </>
                 )}

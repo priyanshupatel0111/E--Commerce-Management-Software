@@ -57,7 +57,7 @@ const ManageSellers = () => {
         }
     };
 
-    if (user?.role !== 'Admin') {
+    if (user?.role !== 'Admin' && user?.role !== 'TENANT_ADMIN') {
         return <div className="p-6 text-red-500">Access Denied. Admins only.</div>;
     }
 

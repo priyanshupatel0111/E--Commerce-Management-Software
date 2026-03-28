@@ -50,10 +50,10 @@ const Dashboard = () => {
             </AuthContext.Consumer>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Last Employee Login Card - Visibile to Admin Only */}
+                {/* Last Employee Login Card - Visibile to Admin & TENANT_ADMIN Only */}
                 <AuthContext.Consumer>
                     {({ user }) => (
-                        user?.role === 'Admin' && (
+                        (user?.role === 'Admin' || user?.role === 'TENANT_ADMIN') && (
                             <div className="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
                                 <div className="flex justify-between items-start mb-4">
                                     <div>

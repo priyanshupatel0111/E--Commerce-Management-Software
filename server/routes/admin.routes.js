@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { ActivityLog, User } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
+const withTenantScope = require('../utils/tenantScope');
 
 // Get Activity Logs - Admin & Watcher
-router.get('/logs', [verifyToken, authorize(['Admin', 'Watcher'])], async (req, res) => {
+router.get('/logs', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Watcher'])], async (req, res) => {
     try {
-        const logs = await ActivityLog.findAll({
+        const logs = await ActivityLog.findAll(withTenantScope(req, {
             include: { model: User, attributes: ['username'] },
             order: [['timestamp', 'DESC']]
-        });
+        }));
         res.json(logs);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -17,9 +18,9 @@ router.get('/logs', [verifyToken, authorize(['Admin', 'Watcher'])], async (req, 
 });
 
 // Delete Activity Log - Admin Only
-router.delete('/logs/:id', [verifyToken, authorize('Admin')], async (req, res) => {
+router.delete('/logs/:id', [verifyToken, authorize(['Admin', 'TENANT_ADMIN'])], async (req, res) => {
     try {
-        const log = await ActivityLog.findByPk(req.params.id);
+        const log = await ActivityLog.findOne(withTenantScope(req, { where: { id: req.params.id } }));
         if (!log) return res.status(404).json({ message: 'Log not found' });
         await log.destroy();
         res.json({ message: 'Log deleted' });

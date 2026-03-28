@@ -26,6 +26,10 @@ const Login = () => {
         e.preventDefault();
         const result = await login(username, password);
         if (result.success) {
+            if (result.user.requires_password_change) {
+                navigate('/change-password');
+                return;
+            }
             const userState = JSON.parse(localStorage.getItem('user'));
             if (userState && userState.role === 'SUPER_ADMIN') {
                 navigate('/super-admin');

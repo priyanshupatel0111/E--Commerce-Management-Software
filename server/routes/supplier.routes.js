@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { Supplier } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
+const withTenantScope = require('../utils/tenantScope');
 
 // Get all suppliers
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const suppliers = await Supplier.findAll();
+        const suppliers = await Supplier.findAll(withTenantScope(req));
         res.json(suppliers);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -14,10 +15,10 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Create a new supplier
-router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
+router.post('/', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Employee'])], async (req, res) => {
     try {
         const { company_name, contact_info } = req.body;
-        const supplier = await Supplier.create({ company_name, contact_info });
+        const supplier = await Supplier.create({ company_name, contact_info, tenant_id: req.tenant_id });
         res.status(201).json(supplier);
     } catch (error) {
         res.status(400).json({ message: error.message });

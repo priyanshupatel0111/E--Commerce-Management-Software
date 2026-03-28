@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { User, Role, Permission, Tenant } = require('../models');
+const { verifyToken } = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
     try {
@@ -38,8 +39,15 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+        const requestedTenantId = req.headers['x-tenant-id'] || req.body.tenant_id;
+        
+        let whereClause = { username };
+        if (requestedTenantId) {
+            whereClause.tenant_id = requestedTenantId;
+        }
+
         const user = await User.findOne({
-            where: { username },
+            where: whereClause,
             include: [
                 {
                     model: Role,
@@ -62,14 +70,12 @@ router.post('/login', async (req, res) => {
         }
 
         // Validate user's role against their assigned tenant
-        const requestedTenantId = req.headers['x-tenant-id'] || req.body.tenant_id;
-        
         if (user.Role && user.Role.role_name !== 'SUPER_ADMIN') {
             if (!requestedTenantId) {
                 return res.status(403).json({ message: 'Store context missing. Please start from the Gateway.' });
             }
-            if (user.tenant_id && user.tenant_id.toString() !== requestedTenantId.toString()) {
-                return res.status(403).json({ message: 'User does not belong to the requested store.' });
+            if (!user.tenant_id || user.tenant_id.toString() !== requestedTenantId.toString()) {
+                return res.status(401).json({ message: 'Invalid User or Password!' });
             }
         }
 
@@ -96,11 +102,36 @@ router.post('/login', async (req, res) => {
             role: user.Role ? user.Role.role_name : null,
             tenant_id: user.tenant_id,
             permissions: permissions,
+            requires_password_change: user.requires_password_change,
             accessToken: token
         });
     } catch (error) {
         console.error('Login Error:', error);
         res.status(500).json({ message: error.message });
+    }
+});
+
+router.put('/change-password', [verifyToken], async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        if (!newPassword) {
+            return res.status(400).json({ message: 'New password is required' });
+        }
+
+        const user = await User.findByPk(req.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const salt = bcrypt.genSaltSync(10);
+        user.password_hash = bcrypt.hashSync(newPassword, salt);
+        user.requires_password_change = false;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Change Password Error:', error);
+        res.status(500).json({ message: 'Error updating password' });
     }
 });
 

@@ -10,6 +10,10 @@ const SuperAdminRoute = ({ children }) => {
   if (!user || user.role !== 'SUPER_ADMIN') {
     return <Navigate to="/login" replace />;
   }
+  
+  if (user.requires_password_change) {
+    return <Navigate to="/change-password" replace />;
+  }
 
   return children;
 };

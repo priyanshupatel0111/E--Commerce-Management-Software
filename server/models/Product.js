@@ -16,12 +16,10 @@ const Product = sequelize.define('Product', {
         }
     },
     sku: {
-        type: DataTypes.STRING,
-        unique: true
+        type: DataTypes.STRING
     },
     product_code: {
         type: DataTypes.STRING,
-        unique: true,
         allowNull: false // Mandatory field
     },
     name: {
@@ -43,6 +41,11 @@ const Product = sequelize.define('Product', {
         type: DataTypes.INTEGER,
         defaultValue: 5
     }
+}, {
+    indexes: [
+        { unique: true, fields: ['tenant_id', 'sku'] },
+        { unique: true, fields: ['tenant_id', 'product_code'] }
+    ]
 });
 
 module.exports = Product;

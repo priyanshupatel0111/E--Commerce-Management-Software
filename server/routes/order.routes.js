@@ -3,9 +3,10 @@ const router = express.Router();
 const { Order, OrderItem, Product, User, sequelize } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
+const withTenantScope = require('../utils/tenantScope');
 
 // Create Order (POS) - Admin & Employee
-router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
+router.post('/', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Employee'])], async (req, res) => {
     const t = await sequelize.transaction();
     try {
         const { customer_id, products, seller_custom_id, platform } = req.body; // products: [{ id, quantity }]
@@ -14,7 +15,7 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
         const orderItems = [];
 
         for (const item of products) {
-            const product = await Product.findByPk(item.id, { transaction: t });
+            const product = await Product.findOne(withTenantScope(req, { where: { id: item.id }, transaction: t }));
             if (!product) throw new Error(`Product ${item.id} not found`);
 
             if (product.current_stock_qty < item.quantity) {
@@ -40,11 +41,12 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
             total_amount,
             status: 'Completed',
             seller_custom_id,
-            platform
+            platform,
+            tenant_id: req.tenant_id
         }, { transaction: t });
 
         for (const item of orderItems) {
-            await OrderItem.create({ ...item, order_id: order.id }, { transaction: t });
+            await OrderItem.create({ ...item, order_id: order.id, tenant_id: req.tenant_id }, { transaction: t });
         }
 
         await logActivity(req.userId, 'Created Order', `Order #${order.id} for $${total_amount}`);
@@ -58,15 +60,15 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
 });
 
 // Get All Orders - Admin, Watcher & Employee (to see their own sales or all sales)
-router.get('/', [verifyToken, authorize(['Admin', 'Watcher', 'Employee'])], async (req, res) => {
+router.get('/', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Watcher', 'Employee'])], async (req, res) => {
     try {
-        const orders = await Order.findAll({
+        const orders = await Order.findAll(withTenantScope(req, {
             include: [
                 { model: OrderItem, include: [Product] },
                 { model: User, as: 'Employee', attributes: ['username'] } // Assuming association exists
             ],
             order: [['createdAt', 'DESC']]
-        });
+        }));
         res.json(orders);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -80,9 +82,10 @@ router.get('/my-orders', [verifyToken], async (req, res) => {
 });
 
 // Get Single Order by ID - Admin, Watcher & Employee
-router.get('/:id', [verifyToken, authorize(['Admin', 'Watcher', 'Employee'])], async (req, res) => {
+router.get('/:id', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Watcher', 'Employee'])], async (req, res) => {
     try {
-        const order = await Order.findByPk(req.params.id, {
+        const order = await Order.findOne(withTenantScope(req, {
+            where: { id: req.params.id },
             include: [
                 {
                     model: OrderItem,
@@ -90,7 +93,7 @@ router.get('/:id', [verifyToken, authorize(['Admin', 'Watcher', 'Employee'])], a
                 },
                 { model: User, as: 'Employee', attributes: ['username'] }
             ]
-        });
+        }));
 
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });

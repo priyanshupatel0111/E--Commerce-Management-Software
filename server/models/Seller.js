@@ -17,13 +17,16 @@ const Seller = sequelize.define('Seller', {
     },
     seller_code: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     seller_name: {
         type: DataTypes.STRING,
         allowNull: false
     }
+}, {
+    indexes: [
+        { unique: true, fields: ['tenant_id', 'seller_code'] }
+    ]
 });
 
 module.exports = Seller;

@@ -3,14 +3,15 @@ const router = express.Router();
 const { MiscellaneousExpense, User } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
+const withTenantScope = require('../utils/tenantScope');
 
 // Get all expenses
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const expenses = await MiscellaneousExpense.findAll({
+        const expenses = await MiscellaneousExpense.findAll(withTenantScope(req, {
             include: [{ model: User, as: 'AddedBy', attributes: ['username'] }],
             order: [['date', 'DESC']]
-        });
+        }));
         res.json(expenses);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -18,7 +19,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Create Expense - Admin & Employee
-router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
+router.post('/', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Employee'])], async (req, res) => {
     try {
         const { description, amount, date } = req.body;
 
@@ -26,7 +27,8 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
             description,
             amount,
             date,
-            added_by: req.userId
+            added_by: req.userId,
+            tenant_id: req.tenant_id
         });
 
         await logActivity(req.userId, 'Added Expense', `Added expense: ${description} for Rs ${amount}`);
@@ -38,10 +40,10 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
 });
 
 // Delete Expense - Admin Only
-router.delete('/:id', [verifyToken, authorize(['Admin'])], async (req, res) => {
+router.delete('/:id', [verifyToken, authorize(['Admin', 'TENANT_ADMIN'])], async (req, res) => {
     try {
         const { id } = req.params;
-        const expense = await MiscellaneousExpense.findByPk(id);
+        const expense = await MiscellaneousExpense.findOne(withTenantScope(req, { where: { id } }));
 
         if (!expense) {
             return res.status(404).json({ message: 'Expense not found' });

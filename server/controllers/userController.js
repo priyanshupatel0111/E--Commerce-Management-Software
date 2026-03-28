@@ -1,9 +1,10 @@
 const { User, Role, sequelize } = require('../models');
 const bcrypt = require('bcrypt');
+const withTenantScope = require('../utils/tenantScope');
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.findAll({
+        const users = await User.findAll(withTenantScope(req, {
             include: [{
                 model: Role,
                 where: {
@@ -11,7 +12,7 @@ const getAllUsers = async (req, res) => {
                 }
             }],
             attributes: { exclude: ['password_hash'] }
-        });
+        }));
         res.json(users);
     } catch (error) {
         console.error(error);
@@ -32,7 +33,7 @@ const createUser = async (req, res) => {
         }
 
         // Check if user exists
-        const existingUser = await User.findOne({ where: { username } });
+        const existingUser = await User.findOne(withTenantScope(req, { where: { username } }));
         if (existingUser) {
             return res.status(400).json({ message: 'Username already exists' });
         }
@@ -43,7 +44,8 @@ const createUser = async (req, res) => {
         const newUser = await User.create({
             username,
             password_hash,
-            role_id: role.id
+            role_id: role.id,
+            tenant_id: req.tenant_id
         });
 
         res.status(201).json({ message: 'User created successfully', user: { id: newUser.id, username: newUser.username, role: role.role_name } });
@@ -56,7 +58,7 @@ const createUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findByPk(id, { include: Role });
+        const user = await User.findOne(withTenantScope(req, { where: { id }, include: Role }));
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -79,7 +81,7 @@ const resetPassword = async (req, res) => {
     const { newPassword } = req.body;
 
     try {
-        const user = await User.findByPk(id, { include: Role });
+        const user = await User.findOne(withTenantScope(req, { where: { id }, include: Role }));
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

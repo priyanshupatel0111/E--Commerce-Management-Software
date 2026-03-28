@@ -1,4 +1,5 @@
 const { Return, Order, Product, OrderItem } = require('../models');
+const withTenantScope = require('../utils/tenantScope');
 
 exports.createReturn = async (req, res) => {
     try {
@@ -11,13 +12,13 @@ exports.createReturn = async (req, res) => {
         // order_id is optional — only look up if provided
         if (order_id) {
             const oId = parseInt(order_id);
-            const order = await Order.findByPk(oId);
+            const order = await Order.findOne(withTenantScope(req, { where: { id: oId } }));
             if (!order) {
                 return res.status(404).json({ message: `Order not found (ID: ${order_id})` });
             }
         }
 
-        const product = await Product.findByPk(pId);
+        const product = await Product.findOne(withTenantScope(req, { where: { id: pId } }));
         if (!product) {
             return res.status(404).json({ message: `Product not found (ID: ${product_id})` });
         }
@@ -33,7 +34,8 @@ exports.createReturn = async (req, res) => {
             platform,
             loss: loss || 0,
             refund_from_platform: refund_from_platform || 0,
-            return_date: new Date()
+            return_date: new Date(),
+            tenant_id: req.tenant_id
         });
 
         // Restock if product quality is Good
@@ -55,13 +57,13 @@ exports.createReturn = async (req, res) => {
 
 exports.getAllReturns = async (req, res) => {
     try {
-        const returns = await Return.findAll({
+        const returns = await Return.findAll(withTenantScope(req, {
             include: [
                 { model: Order },
                 { model: Product, attributes: ['id', 'name', 'product_code'] }
             ],
             order: [['return_date', 'DESC']]
-        });
+        }));
         res.json(returns);
     } catch (error) {
         console.error('Error fetching returns:', error);

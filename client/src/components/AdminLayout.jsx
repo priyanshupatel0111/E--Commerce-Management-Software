@@ -8,6 +8,7 @@ const AdminLayout = () => {
 
     if (loading) return <div>Loading...</div>;
     if (!user) return <Navigate to="/login" />;
+    if (user.requires_password_change) return <Navigate to="/change-password" />;
 
     return (
         <div className="flex min-h-screen bg-gray-50">

@@ -3,6 +3,8 @@ const router = express.Router();
 const { Product, Category } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 const { logActivity } = require('../middleware/logger');
+const jwt = require('jsonwebtoken');
+const withTenantScope = require('../utils/tenantScope');
 
 // Get all products - Admin & Employee & Public? Storefront needs access.
 // Public might need a separate loose route or this one without auth if public.
@@ -12,7 +14,18 @@ const { logActivity } = require('../middleware/logger');
 // Public List
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.findAll({ include: Category });
+        let tenant_id = req.query.store_id || null;
+        if (req.headers['authorization']) {
+            try {
+                const decoded = jwt.verify(req.headers['authorization'].split(' ')[1], process.env.JWT_SECRET || 'secret123');
+                tenant_id = decoded.tenant_id;
+            } catch(e) {}
+        }
+        
+        const products = await Product.findAll({ 
+            where: tenant_id ? { tenant_id } : {}, 
+            include: Category 
+        });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -20,9 +33,9 @@ router.get('/', async (req, res) => {
 });
 
 // Admin & Employee Create
-router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
+router.post('/', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Employee'])], async (req, res) => {
     try {
-        const product = await Product.create(req.body);
+        const product = await Product.create({ ...req.body, tenant_id: req.tenant_id });
         await logActivity(req.userId, 'Created Product', `Created product ${product.name} (${product.sku})`);
         res.status(201).json(product);
     } catch (error) {
@@ -31,9 +44,9 @@ router.post('/', [verifyToken, authorize(['Admin', 'Employee'])], async (req, re
 });
 
 // Admin & Employee Update
-router.put('/:id', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
+router.put('/:id', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Employee'])], async (req, res) => {
     try {
-        const product = await Product.findByPk(req.params.id);
+        const product = await Product.findOne(withTenantScope(req, { where: { id: req.params.id } }));
         if (!product) return res.status(404).json({ message: 'Product not found' });
 
         await product.update(req.body);
@@ -45,9 +58,9 @@ router.put('/:id', [verifyToken, authorize(['Admin', 'Employee'])], async (req, 
 });
 
 // Admin & Employee Delete
-router.delete('/:id', [verifyToken, authorize(['Admin', 'Employee'])], async (req, res) => {
+router.delete('/:id', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'Employee'])], async (req, res) => {
     try {
-        const product = await Product.findByPk(req.params.id);
+        const product = await Product.findOne(withTenantScope(req, { where: { id: req.params.id } }));
         if (!product) return res.status(404).json({ message: 'Product not found' });
 
         await product.destroy();

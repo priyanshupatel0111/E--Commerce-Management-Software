@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import Gateway from './pages/Gateway';
 import Login from './pages/Login';
+import ChangePassword from './pages/ChangePassword';
 import Signup from './pages/Signup';
 import AdminLayout from './components/AdminLayout';
 import Inventory from './pages/Inventory';
@@ -36,6 +37,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Gateway />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/signup" element={<Signup />} />
 
           {/* Super Admin Routes */}

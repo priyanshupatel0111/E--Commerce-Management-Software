@@ -25,7 +25,7 @@ const Sidebar = ({ role }) => {
     }, []);
 
     const getPanelName = (role) => {
-        const base = tenantName ? tenantName : (role === 'Admin' ? 'Admin' : role);
+        const base = tenantName ? tenantName : (role === 'Admin' || role === 'TENANT_ADMIN' ? 'Store Admin' : role);
         return `${base} Panel`;
     };
 
@@ -43,14 +43,14 @@ const Sidebar = ({ role }) => {
                     <Package size={20} /> Inventory
                 </Link>
 
-                {/* POS: Admin & Employee ONLY */}
-                {(role === 'Admin' || role === 'Employee') && (
+                {/* POS: Admin, TENANT_ADMIN, & Employee ONLY */}
+                {(role === 'Admin' || role === 'TENANT_ADMIN' || role === 'Employee') && (
                     <Link to="/admin/pos" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/pos')}`}>
                         <ShoppingCart size={20} /> New Sale (POS)
                     </Link>
                 )}
 
-                {(role === 'Admin' || role === 'Watcher' || role === 'Employee') && (
+                {(role === 'Admin' || role === 'TENANT_ADMIN' || role === 'Watcher' || role === 'Employee') && (
                     <Link to="/admin/sales" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sales')}`}>
                         <ShoppingCart size={20} /> Sales History
                     </Link>
@@ -61,8 +61,8 @@ const Sidebar = ({ role }) => {
                     <Truck size={20} /> Purchases
                 </Link>
 
-                {/* Reports: Admin & Watcher ONLY (Assuming ReportViewer is deprecated or same as Watcher) */}
-                {(role === 'Admin' || role === 'Watcher' || role === 'ReportViewer') && (
+                {/* Reports: Admin, TENANT_ADMIN, & Watcher ONLY */}
+                {(role === 'Admin' || role === 'TENANT_ADMIN' || role === 'Watcher' || role === 'ReportViewer') && (
                     <>
                         <Link to="/admin/revenue" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/revenue')}`}>
                             <FileText size={20} /> Revenue Report
@@ -79,22 +79,22 @@ const Sidebar = ({ role }) => {
                     </>
                 )}
 
-                {/* Misc Expenses: Admin & Employee */}
-                {(role === 'Admin' || role === 'Employee') && (
+                {/* Misc Expenses: Admin, TENANT_ADMIN, & Employee */}
+                {(role === 'Admin' || role === 'TENANT_ADMIN' || role === 'Employee') && (
                     <Link to="/admin/misc-expenses" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/misc-expenses')}`}>
                         <Receipt size={20} /> Misc. Expenses
                     </Link>
                 )}
 
-                {/* Logs: Admin & Watcher ONLY */}
-                {(role === 'Admin' || role === 'Watcher') && (
+                {/* Logs: Admin, TENANT_ADMIN, & Watcher ONLY */}
+                {(role === 'Admin' || role === 'TENANT_ADMIN' || role === 'Watcher') && (
                     <Link to="/admin/logs" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/logs')}`}>
                         <Receipt size={20} /> Staff Logs
                     </Link>
                 )}
 
-                {/* Manage Sellers: Admin ONLY */}
-                {role === 'Admin' && (
+                {/* Manage Sellers: Admin & TENANT_ADMIN ONLY */}
+                {(role === 'Admin' || role === 'TENANT_ADMIN') && (
                     <Link to="/admin/sellers" className={`flex items-center gap-3 px-6 py-3 hover:bg-indigo-800 ${isActive('/admin/sellers')}`}>
                         <ShoppingCart size={20} /> Manage Sellers
                     </Link>

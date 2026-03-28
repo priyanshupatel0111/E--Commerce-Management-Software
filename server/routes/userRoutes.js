@@ -5,7 +5,7 @@ const { verifyToken, authorize } = require('../middleware/auth');
 
 // All routes require Admin role
 router.use(verifyToken);
-router.use(authorize(['Admin']));
+router.use(authorize(['Admin', 'TENANT_ADMIN']));
 
 router.get('/', userController.getAllUsers);
 router.post('/', userController.createUser);

@@ -17,8 +17,7 @@ const User = sequelize.define('User', {
     },
     username: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     password_hash: {
         type: DataTypes.STRING,
@@ -33,7 +32,15 @@ const User = sequelize.define('User', {
             model: 'Roles', // 'Roles' refers to table name
             key: 'id',
         }
+    },
+    requires_password_change: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
+}, {
+    indexes: [
+        { unique: true, fields: ['tenant_id', 'username'] }
+    ]
 });
 
 module.exports = User;

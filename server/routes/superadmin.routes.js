@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { Tenant, User, Role, Permission, RolePermission } = require('../models');
 
 // === 1. Store Management ===
@@ -84,6 +86,74 @@ router.put('/stores/:id', async (req, res) => {
     }
 });
 // === 2. User & Access Management ===
+
+router.post('/stores/:id/admin', async (req, res) => {
+    try {
+        const storeId = req.params.id;
+        const { username } = req.body;
+
+        if (!username) return res.status(400).json({ message: 'Username is required' });
+
+        const store = await Tenant.findByPk(storeId);
+        if (!store) return res.status(404).json({ message: 'Store not found' });
+
+        const existingAdmin = await User.findOne({
+            where: { tenant_id: storeId },
+            include: { model: Role, where: { role_name: 'TENANT_ADMIN' } }
+        });
+
+        if (existingAdmin) {
+            return res.status(400).json({ message: 'Store already has an admin' });
+        }
+
+        const adminRole = await Role.findOne({ where: { role_name: 'TENANT_ADMIN' } });
+        if (!adminRole) return res.status(500).json({ message: 'TENANT_ADMIN role not found in DB' });
+
+        const otp = crypto.randomBytes(4).toString('hex');
+        const salt = bcrypt.genSaltSync(10);
+        const password_hash = bcrypt.hashSync(otp, salt);
+
+        const newAdmin = await User.create({
+            username,
+            password_hash,
+            role_id: adminRole.id,
+            tenant_id: storeId,
+            requires_password_change: true
+        });
+
+        res.status(201).json({ user: newAdmin, otp });
+    } catch (error) {
+        console.error('Create Admin Error:', error);
+        res.status(500).json({ message: 'Error creating admin account' });
+    }
+});
+
+router.put('/stores/:id/admin/reset-password', async (req, res) => {
+    try {
+        const storeId = req.params.id;
+
+        const storeAdmin = await User.findOne({
+            where: { tenant_id: storeId },
+            include: { model: Role, where: { role_name: 'TENANT_ADMIN' } }
+        });
+
+        if (!storeAdmin) {
+            return res.status(404).json({ message: 'Store admin not found' });
+        }
+
+        const newOtp = crypto.randomBytes(4).toString('hex');
+        const salt = bcrypt.genSaltSync(10);
+        storeAdmin.password_hash = bcrypt.hashSync(newOtp, salt);
+        storeAdmin.requires_password_change = true;
+
+        await storeAdmin.save();
+
+        res.json({ message: 'Password reset successful', otp: newOtp });
+    } catch (error) {
+        console.error('Reset Password Error:', error);
+        res.status(500).json({ message: 'Error resetting password' });
+    }
+});
 
 router.get('/users', async (req, res) => {
     try {

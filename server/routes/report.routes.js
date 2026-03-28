@@ -4,13 +4,11 @@ const { sequelize } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
 
 // Stats - Admin & ReportViewer & Watcher
-router.get('/filters', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'])], async (req, res) => {
+router.get('/filters', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'ReportViewer', 'Watcher'])], async (req, res) => {
     try {
-        // Fetch all sellers
-        const sellers = await sequelize.query('SELECT seller_code, seller_name FROM "Sellers"', { type: sequelize.QueryTypes.SELECT });
-
-        // Fetch distinct platforms from Orders
-        const platforms = await sequelize.query('SELECT DISTINCT platform FROM "Orders" WHERE platform IS NOT NULL', { type: sequelize.QueryTypes.SELECT });
+        const replacements = { tenant_id: req.tenant_id };
+        const sellers = await sequelize.query('SELECT seller_code, seller_name FROM "Sellers" WHERE tenant_id = :tenant_id', { replacements, type: sequelize.QueryTypes.SELECT });
+        const platforms = await sequelize.query('SELECT DISTINCT platform FROM "Orders" WHERE platform IS NOT NULL AND tenant_id = :tenant_id', { replacements, type: sequelize.QueryTypes.SELECT });
 
         res.json({
             sellers,
@@ -21,13 +19,13 @@ router.get('/filters', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watche
     }
 });
 
-router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'])], async (req, res) => {
+router.get('/stats', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'ReportViewer', 'Watcher'])], async (req, res) => {
     try {
         const { sellerId, platform } = req.query;
-        const replacements = {};
+        const replacements = { tenant_id: req.tenant_id };
 
         // Build Sales Query
-        let salesSql = 'SELECT SUM(total_amount) as total_sales FROM "Orders" WHERE status = \'Completed\'';
+        let salesSql = 'SELECT SUM(total_amount) as total_sales FROM "Orders" WHERE status = \'Completed\' AND tenant_id = :tenant_id';
 
         // Build Profit Query
         let profitSql = `
@@ -35,7 +33,7 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
             FROM "OrderItems" oi
             JOIN "Products" p ON oi.product_id = p.id
             JOIN "Orders" o ON oi.order_id = o.id
-            WHERE o.status = 'Completed'
+            WHERE o.status = 'Completed' AND o.tenant_id = :tenant_id
         `;
 
         // Build Top Products Query
@@ -44,7 +42,7 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
             FROM "OrderItems" oi
             JOIN "Products" p ON oi.product_id = p.id
             JOIN "Orders" o ON oi.order_id = o.id
-            WHERE o.status = 'Completed'
+            WHERE o.status = 'Completed' AND o.tenant_id = :tenant_id
         `;
 
         if (sellerId) {
@@ -81,16 +79,10 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
         // Let's keep Purchases as global for now but maybe we should filter if possible? 
         // Logic: Purchase -> No seller_custom_id/platform columns seen in Purchase.js.
         // So we keep purchases as is (Total Cost).
-        const purchases = await sequelize.query('SELECT SUM(total_cost) as total_costs FROM "Purchases"', { type: sequelize.QueryTypes.SELECT });
-
-        // Miscellaneous Expenses
-        const miscExpenses = await sequelize.query('SELECT SUM(amount) as total_misc FROM "MiscellaneousExpenses"', { type: sequelize.QueryTypes.SELECT });
-
-        // Return Loss from Returns table
-        const returnLoss = await sequelize.query('SELECT SUM(loss) as total_loss FROM "Returns"', { type: sequelize.QueryTypes.SELECT });
-
-        // Refund from Platform from Returns table
-        const refundFromPlatform = await sequelize.query('SELECT SUM(refund_from_platform) as total_refund FROM "Returns"', { type: sequelize.QueryTypes.SELECT });
+        const purchases = await sequelize.query('SELECT SUM(total_cost) as total_costs FROM "Purchases" WHERE tenant_id = :tenant_id', { replacements, type: sequelize.QueryTypes.SELECT });
+        const miscExpenses = await sequelize.query('SELECT SUM(amount) as total_misc FROM "MiscellaneousExpenses" WHERE tenant_id = :tenant_id', { replacements, type: sequelize.QueryTypes.SELECT });
+        const returnLoss = await sequelize.query('SELECT SUM(loss) as total_loss FROM "Returns" WHERE tenant_id = :tenant_id', { replacements, type: sequelize.QueryTypes.SELECT });
+        const refundFromPlatform = await sequelize.query('SELECT SUM(refund_from_platform) as total_refund FROM "Returns" WHERE tenant_id = :tenant_id', { replacements, type: sequelize.QueryTypes.SELECT });
 
         const topProducts = await sequelize.query(topProductsSql, {
             replacements,
@@ -111,7 +103,7 @@ router.get('/stats', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'
     }
 });
 
-router.get('/sold-items', [verifyToken, authorize(['Admin', 'ReportViewer', 'Watcher'])], async (req, res) => {
+router.get('/sold-items', [verifyToken, authorize(['Admin', 'TENANT_ADMIN', 'ReportViewer', 'Watcher'])], async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         let query = `
@@ -123,10 +115,10 @@ router.get('/sold-items', [verifyToken, authorize(['Admin', 'ReportViewer', 'Wat
             FROM "OrderItems" oi
             JOIN "Products" p ON oi.product_id = p.id
             JOIN "Orders" o ON oi.order_id = o.id
-            WHERE o.status = 'Completed'
+            WHERE o.status = 'Completed' AND o.tenant_id = :tenant_id
         `;
 
-        const replacements = {};
+        const replacements = { tenant_id: req.tenant_id };
 
         if (startDate) {
             query += ` AND o.order_date >= :startDate`;

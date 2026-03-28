@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { Seller } = require('../models');
 const { verifyToken, authorize } = require('../middleware/auth');
+const withTenantScope = require('../utils/tenantScope');
 
 // Get All Sellers - Authenticated Users (Admin, Employee, Watcher need to see list)
 router.get('/', [verifyToken], async (req, res) => {
     try {
-        const sellers = await Seller.findAll();
+        const sellers = await Seller.findAll(withTenantScope(req));
         res.json(sellers);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -14,10 +15,10 @@ router.get('/', [verifyToken], async (req, res) => {
 });
 
 // Create Seller - Admin Only
-router.post('/', [verifyToken, authorize('Admin')], async (req, res) => {
+router.post('/', [verifyToken, authorize(['Admin', 'TENANT_ADMIN'])], async (req, res) => {
     try {
         const { seller_code, seller_name } = req.body;
-        const seller = await Seller.create({ seller_code, seller_name });
+        const seller = await Seller.create({ seller_code, seller_name, tenant_id: req.tenant_id });
         res.status(201).json(seller);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -25,9 +26,9 @@ router.post('/', [verifyToken, authorize('Admin')], async (req, res) => {
 });
 
 // Delete Seller - Admin Only
-router.delete('/:id', [verifyToken, authorize('Admin')], async (req, res) => {
+router.delete('/:id', [verifyToken, authorize(['Admin', 'TENANT_ADMIN'])], async (req, res) => {
     try {
-        const seller = await Seller.findByPk(req.params.id);
+        const seller = await Seller.findOne(withTenantScope(req, { where: { id: req.params.id } }));
         if (!seller) return res.status(404).json({ message: 'Seller not found' });
         await seller.destroy();
         res.json({ message: 'Seller deleted' });

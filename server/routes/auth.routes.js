@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User, Role, Permission, Tenant } = require('../models');
+const { User, Role, Permission, Tenant, PasswordResetOTP } = require('../models');
 const { verifyToken } = require('../middleware/auth');
 
 router.post('/register', async (req, res) => {
@@ -132,6 +132,120 @@ router.put('/change-password', [verifyToken], async (req, res) => {
     } catch (error) {
         console.error('Change Password Error:', error);
         res.status(500).json({ message: 'Error updating password' });
+    }
+});
+
+// Helper function to generate a 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+router.post('/forgot-password/request-otp', async (req, res) => {
+    try {
+        const { username, tenant_id } = req.body;
+        
+        let whereClause = { username };
+        if (tenant_id) {
+            whereClause.tenant_id = tenant_id;
+        }
+
+        const user = await User.findOne({ where: whereClause });
+        if (!user) {
+            return res.status(404).json({ message: 'If an account matches, an OTP has been sent.' });
+        }
+
+        if (!user.email || !user.phone_number) {
+             return res.status(400).json({ message: 'User profile incomplete for Dual OTP verification. Contact Administrator.' });
+        }
+
+        // Deactivate previous unused OTPs for this user
+        await PasswordResetOTP.update({ is_used: true }, {
+            where: { user_id: user.id, is_used: false }
+        });
+
+        const email_otp = generateOTP();
+        const phone_otp = generateOTP();
+
+        // Expire in 10 minutes
+        const expires_at = new Date(Date.now() + 10 * 60 * 1000);
+
+        await PasswordResetOTP.create({
+            user_id: user.id,
+            email_otp,
+            phone_otp,
+            expires_at
+        });
+
+        // Simulate sending messages
+        console.log(`\n===========================================`);
+        console.log(`[SIMULATED EMAIL] To: ${user.email}`);
+        console.log(`Subject: Password Reset OTP`);
+        console.log(`Body: Your Email OTP is ${email_otp}. It expires in 10 minutes.`);
+        console.log(`-------------------------------------------`);
+        console.log(`[SIMULATED SMS] To: ${user.phone_number}`);
+        console.log(`Body: Your Mobile OTP is ${phone_otp}. It expires in 10 minutes.`);
+        console.log(`===========================================\n`);
+
+        res.json({ 
+            message: 'OTPs generated successfully.', 
+            email_masked: user.email.replace(/(.{2})(.*)(?=@)/, (gp1, gp2, gp3) => { 
+                 return gp1 + gp2.replace(/./g, '*') + gp3; 
+            }),
+            phone_masked: user.phone_number.slice(0, 3) + '******' + user.phone_number.slice(-3)
+        });
+    } catch (error) {
+        console.error('Request OTP Error:', error);
+        res.status(500).json({ message: 'Error processing request.' });
+    }
+});
+
+router.post('/forgot-password/verify-otp', async (req, res) => {
+    try {
+        const { username, tenant_id, email_otp, phone_otp, newPassword } = req.body;
+
+        if (!email_otp || !phone_otp || !newPassword) {
+            return res.status(400).json({ message: 'Missing required fields.' });
+        }
+
+        let whereClause = { username };
+        if (tenant_id) {
+            whereClause.tenant_id = tenant_id;
+        }
+
+        const user = await User.findOne({ where: whereClause });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid request.' });
+        }
+
+        const otpRecord = await PasswordResetOTP.findOne({
+            where: {
+                user_id: user.id,
+                email_otp: email_otp.trim(),
+                phone_otp: phone_otp.trim(),
+                is_used: false,
+            }
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({ message: 'Invalid OTPs provided.' });
+        }
+
+        if (new Date() > otpRecord.expires_at) {
+            return res.status(400).json({ message: 'OTPs have expired. Please request new ones.' });
+        }
+        
+        // Hash new password
+        const salt = bcrypt.genSaltSync(10);
+        user.password_hash = bcrypt.hashSync(newPassword, salt);
+        user.requires_password_change = false;
+        await user.save();
+
+        // Mark OTP as used
+        otpRecord.is_used = true;
+        await otpRecord.save();
+
+        res.json({ message: 'Password reset successfully. You can now login.' });
+    } catch (error) {
+        console.error('Verify OTP Error:', error);
+        res.status(500).json({ message: 'Error verifying OTP.' });
     }
 });
 

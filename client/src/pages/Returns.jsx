@@ -11,7 +11,7 @@ const Returns = () => {
 
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { token } = useAuth();
+    const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
     // New Return Form State

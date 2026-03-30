@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Store, Users, DollarSign } from 'lucide-react';
+import { Store, Users, IndianRupee } from 'lucide-react';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({ totalStores: 0, totalUsers: 0, totalRevenue: 0 });
@@ -55,11 +55,11 @@ const Dashboard = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
           <div className="p-4 bg-purple-50 text-purple-600 rounded-lg">
-            <DollarSign size={24} />
+            <IndianRupee size={24} />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Estimated ARR</p>
-            <h3 className="text-2xl font-bold text-gray-900">${stats.totalRevenue.toLocaleString()}</h3>
+            <h3 className="text-2xl font-bold text-gray-900">₹{stats.totalRevenue.toLocaleString('en-IN')}</h3>
           </div>
         </div>
       </div>

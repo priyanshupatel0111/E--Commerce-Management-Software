@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Search } from 'lucide-react';
+import { Search, Lock } from 'lucide-react';
 
 const Gateway = () => {
   const [storeCode, setStoreCode] = useState('');
@@ -77,6 +77,12 @@ const Gateway = () => {
             {loading ? 'Verifying...' : 'Access Store Portal'}
           </button>
         </form>
+
+        <div className="mt-8 text-center pt-6 border-t border-gray-100">
+          <Link to="/super-admin-login" className="text-xs text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-1.5 font-medium">
+            <Lock size={12} /> System Admin Portal
+          </Link>
+        </div>
       </div>
     </div>
   );

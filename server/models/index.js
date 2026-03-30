@@ -16,6 +16,7 @@ const ActivityLog = require('./ActivityLog');
 const Seller = require('./Seller'); // Added
 const MiscellaneousExpense = require('./MiscellaneousExpense'); // Added
 const Return = require('./Return'); // Added
+const PasswordResetOTP = require('./PasswordResetOTP');
 
 // Tenant Relationships
 const tenantModels = [User, Category, Product, Customer, Order, OrderItem, Supplier, Purchase, PurchaseItem, ActivityLog, Seller, MiscellaneousExpense, Return];
@@ -31,6 +32,9 @@ Permission.belongsToMany(Role, { through: RolePermission, foreignKey: 'permissio
 // User & Role
 Role.hasMany(User, { foreignKey: 'role_id' });
 User.belongsTo(Role, { foreignKey: 'role_id' });
+
+User.hasMany(PasswordResetOTP, { foreignKey: 'user_id' });
+PasswordResetOTP.belongsTo(User, { foreignKey: 'user_id' });
 
 // Order Associations
 User.hasMany(Order, { foreignKey: 'employee_id' });
@@ -92,5 +96,6 @@ module.exports = {
     ActivityLog,
     Seller, 
     MiscellaneousExpense, 
-    Return 
+    Return,
+    PasswordResetOTP
 };

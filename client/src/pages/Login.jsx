@@ -92,14 +92,14 @@ const Login = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
+                            <div className="flex justify-end mt-2">
+                                <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline">Forgot Password?</Link>
+                            </div>
                         </div>
                         <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2.5 rounded-lg shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all mt-4">
                             Login
                         </button>
                     </form>
-                    <div className="mt-6 text-center space-y-2">
-                        <Link to="/signup" className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline block">Register as Admin</Link>
-                    </div>
                 </div>
             </div>
         </div>

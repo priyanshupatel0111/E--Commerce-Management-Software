@@ -40,10 +40,21 @@ exports.createReturn = async (req, res) => {
 
         // Restock if product quality is Good
         if (product_quality === 'Good') {
-            console.log(`DEBUG: Restocking product ${pId}. Current: ${product.current_stock_qty}, Adding: ${quantity}`);
-            product.current_stock_qty = (product.current_stock_qty || 0) + parseInt(quantity);
+            const addedQty = parseInt(quantity, 10);
+            console.log(`DEBUG: Restocking product ${pId}. Current: ${product.current_stock_qty}, Adding: ${addedQty}`);
+            product.current_stock_qty = (product.current_stock_qty || 0) + addedQty;
             await product.save();
             console.log(`DEBUG: New stock: ${product.current_stock_qty}`);
+            
+            // Log the restock activity
+            try {
+                const { logActivity } = require('../middleware/logger');
+                if (logActivity && req.userId) {
+                    await logActivity(req.userId, 'Restock from Return', `Added ${addedQty} units of Product '${product.name}' back to inventory (Return ID: ${newReturn.id})`);
+                }
+            } catch (err) {
+                console.warn('Could not log restock activity:', err);
+            }
         } else {
             console.log(`DEBUG: No restock. Quality: ${product_quality}`);
         }

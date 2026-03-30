@@ -3,7 +3,9 @@ import { AuthProvider } from './context/AuthContext';
 import Gateway from './pages/Gateway';
 import Login from './pages/Login';
 import ChangePassword from './pages/ChangePassword';
+import ForgotPassword from './pages/ForgotPassword';
 import Signup from './pages/Signup';
+import SuperAdminLogin from './pages/SuperAdminLogin';
 import AdminLayout from './components/AdminLayout';
 import Inventory from './pages/Inventory';
 import POS from './pages/POS';
@@ -37,6 +39,8 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<Gateway />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/super-admin-login" element={<SuperAdminLogin />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/signup" element={<Signup />} />
 
